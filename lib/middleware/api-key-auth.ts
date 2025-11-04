@@ -1,0 +1,238 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import type {
+  ApiResponse,
+  ApiRequestContext,
+  API_ERROR_CODES,
+} from '@bug-reporter/shared';
+
+/**
+ * API Key Authentication Middleware
+ * Validates API keys for public SDK endpoints
+ */
+
+export interface ApiKeyAuthResult {
+  success: boolean;
+  context?: ApiRequestContext;
+  error?: {
+    code: string;
+    message: string;
+    status: number;
+  };
+}
+
+/**
+ * Validate API key from request headers
+ * Expects header: X-API-Key: your-api-key
+ */
+export async function validateApiKey(
+  request: NextRequest
+): Promise<ApiKeyAuthResult> {
+  try {
+    // Extract API key from headers
+    const apiKey = request.headers.get('X-API-Key') || request.headers.get('x-api-key');
+
+    if (!apiKey) {
+      return {
+        success: false,
+        error: {
+          code: 'MISSING_API_KEY',
+          message: 'API key is required. Provide it in the X-API-Key header.',
+          status: 401,
+        },
+      };
+    }
+
+    // Create Supabase client with service role
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
+
+    // Query applications table for API key
+    const { data: application, error: appError } = await supabase
+      .from('applications')
+      .select(
+        `
+        id,
+        name,
+        slug,
+        organization_id,
+        api_key,
+        created_at,
+        organizations (
+          id,
+          name,
+          slug
+        )
+      `
+      )
+      .eq('api_key', apiKey)
+      .single();
+
+    if (appError || !application) {
+      console.error('[ApiKeyAuth] API key validation failed:', appError);
+      return {
+        success: false,
+        error: {
+          code: 'INVALID_API_KEY',
+          message: 'Invalid API key provided.',
+          status: 401,
+        },
+      };
+    }
+
+    // Extract organization (Supabase returns array for foreign key)
+    const organization = Array.isArray(application.organizations)
+      ? application.organizations[0]
+      : application.organizations;
+
+    if (!organization) {
+      return {
+        success: false,
+        error: {
+          code: 'ORGANIZATION_NOT_FOUND',
+          message: 'Organization associated with this API key not found.',
+          status: 404,
+        },
+      };
+    }
+
+    // Build context
+    const context: ApiRequestContext = {
+      api_key: {
+        id: application.id,
+        application_id: application.id,
+        organization_id: application.organization_id,
+        key_prefix: apiKey.substring(0, 8) + '...',
+        is_active: true,
+        created_at: application.created_at,
+      },
+      application: {
+        id: application.id,
+        name: application.name,
+        slug: application.slug,
+        organization_id: application.organization_id,
+      },
+      organization: {
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+      },
+      request_ip: request.headers.get('x-forwarded-for') || undefined,
+      user_agent: request.headers.get('user-agent') || undefined,
+    };
+
+    console.log('[ApiKeyAuth] API key validated:', {
+      application: application.name,
+      organization: organization.name,
+    });
+
+    // Update last_used_at (optional, fire and forget)
+    void supabase
+      .from('applications')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', application.id)
+      .then(() => console.log('[ApiKeyAuth] Updated last used timestamp'));
+
+    return {
+      success: true,
+      context,
+    };
+  } catch (error) {
+    console.error('[ApiKeyAuth] Unexpected error:', error);
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error during API key validation.',
+        status: 500,
+      },
+    };
+  }
+}
+
+/**
+ * Create error response for API
+ */
+export function createApiErrorResponse<T = any>(
+  code: string,
+  message: string,
+  status: number = 400,
+  details?: any
+): NextResponse<ApiResponse<T>> {
+  const response: ApiResponse<T> = {
+    success: false,
+    error: {
+      code,
+      message,
+      details,
+    },
+  };
+
+  return NextResponse.json(response, {
+    status,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, x-api-key',
+    }
+  });
+}
+
+/**
+ * Create success response for API
+ */
+export function createApiSuccessResponse<T = any>(
+  data: T,
+  status: number = 200
+): NextResponse<ApiResponse<T>> {
+  const response: ApiResponse<T> = {
+    success: true,
+    data,
+  };
+
+  return NextResponse.json(response, {
+    status,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, x-api-key',
+    }
+  });
+}
+
+/**
+ * Middleware wrapper for API routes
+ * Validates API key and passes context to handler
+ */
+export function withApiKeyAuth<T = any>(
+  handler: (
+    request: NextRequest,
+    context: ApiRequestContext,
+    routeContext?: any
+  ) => Promise<NextResponse<ApiResponse<T>>>
+) {
+  return async (
+    request: NextRequest,
+    routeContext?: any
+  ): Promise<NextResponse<ApiResponse<T>>> => {
+    const authResult = await validateApiKey(request);
+
+    if (!authResult.success || !authResult.context) {
+      return createApiErrorResponse(
+        authResult.error!.code,
+        authResult.error!.message,
+        authResult.error!.status
+      );
+    }
+
+    return handler(request, authResult.context, routeContext);
+  };
+}

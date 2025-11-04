@@ -1,0 +1,235 @@
+'use client';
+
+import { createClient } from '@/lib/supabase/client';
+import type {
+  Organization,
+  CreateOrganizationPayload,
+  UpdateOrganizationPayload,
+} from '@bug-reporter/shared';
+
+export class OrganizationClientService {
+  /**
+   * Get all organizations for current user
+   */
+  static async getUserOrganizations(): Promise<Organization[]> {
+    try {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Get organization IDs where user is a member
+      const { data: memberships, error: memberError } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id);
+
+      if (memberError) throw memberError;
+
+      const orgIds = memberships?.map((m) => m.organization_id) || [];
+
+      if (orgIds.length === 0) {
+        return [];
+      }
+
+      // Get organizations
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .in('id', orgIds)
+        .order('name');
+
+      if (error) throw error;
+
+      console.log('[organizations] Fetched user organizations:', data?.length);
+      return data || [];
+    } catch (error) {
+      console.error('[organizations] Error fetching user organizations:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get organization by slug (client-side)
+   */
+  static async getOrganizationBySlug(slug: string): Promise<Organization | null> {
+    try {
+      const supabase = createClient();
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        throw error;
+      }
+
+      console.log('[organizations] Fetched organization by slug:', slug);
+      return data;
+    } catch (error) {
+      console.error('[organizations] Error fetching organization by slug:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create new organization
+   */
+  static async createOrganization(
+    payload: CreateOrganizationPayload
+  ): Promise<Organization> {
+    try {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Check if slug is available
+      const { data: existing } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('slug', payload.slug)
+        .maybeSingle();
+
+      if (existing) {
+        throw new Error('Organization slug already exists');
+      }
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .insert([
+          {
+            ...payload,
+            owner_user_id: user.id,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('[organizations] Created organization:', data.slug);
+      return data;
+    } catch (error) {
+      console.error('[organizations] Error creating organization:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update organization
+   */
+  static async updateOrganization(
+    payload: UpdateOrganizationPayload
+  ): Promise<Organization> {
+    try {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Verify user is owner
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('owner_user_id')
+        .eq('id', payload.id)
+        .single();
+
+      if (!org || org.owner_user_id !== user.id) {
+        throw new Error('Only organization owner can update');
+      }
+
+      // If updating slug, check availability
+      if (payload.slug) {
+        const { data: existing } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('slug', payload.slug)
+          .neq('id', payload.id)
+          .maybeSingle();
+
+        if (existing) {
+          throw new Error('Organization slug already exists');
+        }
+      }
+
+      const { id, ...updates } = payload;
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('[organizations] Updated organization:', data.slug);
+      return data;
+    } catch (error) {
+      console.error('[organizations] Error updating organization:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete organization
+   */
+  static async deleteOrganization(id: string): Promise<void> {
+    try {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Verify user is owner
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('owner_user_id')
+        .eq('id', id)
+        .single();
+
+      if (!org || org.owner_user_id !== user.id) {
+        throw new Error('Only organization owner can delete');
+      }
+
+      const { error } = await supabase.from('organizations').delete().eq('id', id);
+
+      if (error) throw error;
+
+      console.log('[organizations] Deleted organization:', id);
+    } catch (error) {
+      console.error('[organizations] Error deleting organization:', error);
+      throw error;
+    }
+  }
+}
