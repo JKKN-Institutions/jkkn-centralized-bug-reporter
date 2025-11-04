@@ -11,7 +11,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { AllowedDomainsInput } from './allowed-domains-input';
@@ -22,12 +22,19 @@ const applicationFormSchema = z.object({
   slug: z
     .string()
     .min(2, 'Slug must be at least 2 characters')
-    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug can only contain lowercase letters, numbers, and hyphens'
+    ),
   app_url: z.string().url('Must be a valid URL'),
   settings: z.object({
     allowed_domains: z.array(z.string()).optional(),
-    webhook_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  }),
+    webhook_url: z
+      .string()
+      .url('Must be a valid URL')
+      .optional()
+      .or(z.literal(''))
+  })
 });
 
 type ApplicationFormValues = z.infer<typeof applicationFormSchema>;
@@ -41,7 +48,7 @@ interface ApplicationFormProps {
 export function ApplicationForm({
   application,
   onSubmit,
-  submitLabel = 'Create Application',
+  submitLabel = 'Create Application'
 }: ApplicationFormProps) {
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationFormSchema),
@@ -51,9 +58,9 @@ export function ApplicationForm({
       app_url: application?.app_url || '',
       settings: {
         allowed_domains: application?.settings?.allowed_domains || [],
-        webhook_url: application?.settings?.webhook_url || '',
-      },
-    },
+        webhook_url: application?.settings?.webhook_url || ''
+      }
+    }
   });
 
   // Auto-generate slug from name
@@ -76,16 +83,16 @@ export function ApplicationForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
         <FormField
           control={form.control}
-          name="name"
+          name='name'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Application Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="My Awesome App"
+                  placeholder='My Awesome App'
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -93,7 +100,9 @@ export function ApplicationForm({
                   }}
                 />
               </FormControl>
-              <FormDescription>The display name of your application</FormDescription>
+              <FormDescription>
+                The display name of your application
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -101,13 +110,13 @@ export function ApplicationForm({
 
         <FormField
           control={form.control}
-          name="slug"
+          name='slug'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="my-awesome-app"
+                  placeholder='my-awesome-app'
                   {...field}
                   disabled={!!application}
                 />
@@ -123,18 +132,16 @@ export function ApplicationForm({
 
         <FormField
           control={form.control}
-          name="app_url"
+          name='app_url'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Application URL</FormLabel>
               <FormControl>
-                <Input
-                  type="url"
-                  placeholder="https://myapp.com"
-                  {...field}
-                />
+                <Input type='url' placeholder='https://myapp.com' {...field} />
               </FormControl>
-              <FormDescription>The main URL of your application</FormDescription>
+              <FormDescription>
+                The main URL of your application
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -142,7 +149,7 @@ export function ApplicationForm({
 
         <FormField
           control={form.control}
-          name="settings.allowed_domains"
+          name='settings.allowed_domains'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Allowed Domains</FormLabel>
@@ -162,14 +169,14 @@ export function ApplicationForm({
 
         <FormField
           control={form.control}
-          name="settings.webhook_url"
+          name='settings.webhook_url'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Webhook URL (Optional)</FormLabel>
               <FormControl>
                 <Input
-                  type="url"
-                  placeholder="https://myapp.com/webhooks/bugs"
+                  type='url'
+                  placeholder='https://myapp.com/webhooks/bugs'
                   {...field}
                 />
               </FormControl>
@@ -181,7 +188,11 @@ export function ApplicationForm({
           )}
         />
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button
+          type='submit'
+          disabled={form.formState.isSubmitting}
+          className='bg-linear-to-r from-blue-600 to-blue-700 text-white'
+        >
           {form.formState.isSubmitting ? 'Saving...' : submitLabel}
         </Button>
       </form>

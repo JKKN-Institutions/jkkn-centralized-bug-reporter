@@ -376,19 +376,28 @@ export default function Home() {
               <h3 className='font-semibold mb-4 text-lg'>Resources</h3>
               <ul className='space-y-2 text-sm text-gray-400'>
                 <li>
-                  <a href='#' className='hover:text-white transition-colors'>
+                  <Link
+                    href='/docs'
+                    className='hover:text-white transition-colors'
+                  >
                     Documentation
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href='#' className='hover:text-white transition-colors'>
+                  <Link
+                    href='/docs'
+                    className='hover:text-white transition-colors'
+                  >
                     API Reference
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href='#' className='hover:text-white transition-colors'>
+                  <Link
+                    href='/docs'
+                    className='hover:text-white transition-colors'
+                  >
                     SDK Guide
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

@@ -232,4 +232,40 @@ export class OrganizationClientService {
       throw error;
     }
   }
+
+  /**
+   * Get organization statistics
+   */
+  static async getOrganizationStats(organizationId: string) {
+    try {
+      const supabase = createClient();
+
+      // Count applications
+      const { count: appsCount } = await supabase
+        .from('applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId);
+
+      // Count bug reports
+      const { count: bugsCount } = await supabase
+        .from('bug_reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId);
+
+      // Count members
+      const { count: membersCount } = await supabase
+        .from('organization_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId);
+
+      return {
+        totalApps: appsCount || 0,
+        totalBugs: bugsCount || 0,
+        totalMembers: membersCount || 0,
+      };
+    } catch (error) {
+      console.error('[organizations] Error fetching stats:', error);
+      throw error;
+    }
+  }
 }

@@ -18,20 +18,22 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className='max-w-7xl space-y-6'>
       <div>
-        <h1 className="text-3xl font-bold">Organization Settings</h1>
-        <p className="text-muted-foreground">Manage your organization configuration</p>
+        <h1 className='text-3xl font-bold'>Organization Settings</h1>
+        <p className='text-muted-foreground'>
+          Manage your organization configuration
+        </p>
       </div>
 
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className='pt-6'>
           <OrganizationForm
             organization={organization}
             onSubmit={async (values) => {
               await updateOrganization({
                 id: organization.id,
-                ...values,
+                ...values
               });
             }}
             submitLabel={updating ? 'Saving...' : 'Save Changes'}

@@ -2,15 +2,22 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { List } from 'lucide-react';
+import { List, RefreshCw } from 'lucide-react';
 import { useBugStats } from '@/hooks/bug-reports/use-bug-reports';
 import { useOrganizationContext } from '@/hooks/organizations/use-organization-context';
 import { BugStatsCards } from '../_components/bug-stats-cards';
 import { Skeleton } from '@/components/ui/skeleton';
+import toast from 'react-hot-toast';
 
 export default function BugDashboardPage() {
   const { organization, loading: orgLoading } = useOrganizationContext();
-  const { stats, loading } = useBugStats(organization?.id || '');
+  const { stats, loading, refetch } = useBugStats(organization?.id || '');
+
+  const handleRefresh = async () => {
+    toast.loading('Refreshing data...', { id: 'refresh-dashboard' });
+    await refetch();
+    toast.success('Data refreshed!', { id: 'refresh-dashboard' });
+  };
 
   if (orgLoading || loading) {
     return (
@@ -40,12 +47,18 @@ export default function BugDashboardPage() {
             Overview of bug reports for {organization.name}
           </p>
         </div>
-        <Button asChild>
-          <Link href={`/org/${organization.slug}/bugs`}>
-            <List className="mr-2 h-4 w-4" />
-            View All Bugs
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button asChild>
+            <Link href={`/org/${organization.slug}/bugs`}>
+              <List className="mr-2 h-4 w-4" />
+              View All Bugs
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <BugStatsCards stats={stats} loading={loading} />

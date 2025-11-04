@@ -4,10 +4,22 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { ApplicationStats } from '../_components/application-stats';
 import { ApiKeyDisplay } from '../_components/api-key-display';
-import { ExternalLink, Settings, Trash2 } from 'lucide-react';
+import {
+  ExternalLink,
+  Settings,
+  Bug,
+  Calendar,
+  Globe,
+  Hash,
+  Shield,
+  ArrowLeft,
+  FileText,
+  AlertCircle
+} from 'lucide-react';
 
 interface ApplicationPageProps {
   params: Promise<{
@@ -37,104 +49,264 @@ export default async function ApplicationPage({ params }: ApplicationPageProps) 
   const stats = await ApplicationServerService.getApplicationStats(application.id);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{application.name}</h1>
-          <p className="text-muted-foreground">Application dashboard and settings</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/org/${slug}/apps/${appSlug}/edit`}>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </Link>
-          </Button>
+    <div className="space-y-8">
+      {/* Breadcrumb & Header */}
+      <div className="space-y-4">
+        <Button variant="ghost" size="sm" asChild className="gap-2">
+          <Link href={`/org/${slug}/apps`}>
+            <ArrowLeft className="h-4 w-4" />
+            Back to Applications
+          </Link>
+        </Button>
+
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-3">
+                <Bug className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">{application.name}</h1>
+                <p className="text-muted-foreground">
+                  Application in <span className="font-medium text-foreground">{organization.name}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`/org/${slug}/bugs?app=${appSlug}`}>
+                <FileText className="mr-2 h-4 w-4" />
+                View Bug Reports
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href={`/org/${slug}/apps/${appSlug}/edit`}>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* Stats Section */}
       <ApplicationStats stats={stats} />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Application Information */}
+        <Card className="border-l-4 border-l-primary">
           <CardHeader>
-            <CardTitle>Application Info</CardTitle>
-            <CardDescription>Basic information about your application</CardDescription>
+            <div className="flex items-center gap-2">
+              <div className="rounded-md bg-primary/10 p-2">
+                <AlertCircle className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Application Information</CardTitle>
+                <CardDescription>Basic details and configuration</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Name</dt>
-              <dd className="text-sm">{application.name}</dd>
+          <CardContent className="space-y-6">
+            {/* Name */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                Application Name
+              </div>
+              <p className="text-base font-semibold">{application.name}</p>
             </div>
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Slug</dt>
-              <dd className="text-sm font-mono">{application.slug}</dd>
+
+            <Separator />
+
+            {/* Slug */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Hash className="h-4 w-4" />
+                Slug
+              </div>
+              <code className="block rounded-md bg-muted px-3 py-2 text-sm font-mono">
+                {application.slug}
+              </code>
             </div>
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">URL</dt>
-              <dd className="text-sm">
-                <a
-                  href={application.app_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline flex items-center gap-1"
-                >
-                  {application.app_url}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </dd>
+
+            <Separator />
+
+            {/* URL */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Globe className="h-4 w-4" />
+                Application URL
+              </div>
+              <a
+                href={application.app_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-primary hover:underline hover:text-primary/80 transition-colors"
+              >
+                <span className="break-all">{application.app_url}</span>
+                <ExternalLink className="h-4 w-4 flex-shrink-0" />
+              </a>
             </div>
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Created</dt>
-              <dd className="text-sm">
-                {new Date(application.created_at).toLocaleDateString()}
-              </dd>
+
+            <Separator />
+
+            {/* Created Date */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                Created On
+              </div>
+              <p className="text-sm font-medium">
+                {new Date(application.created_at).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
             </div>
+
+            {/* Allowed Domains */}
             {application.settings?.allowed_domains &&
               application.settings.allowed_domains.length > 0 && (
-                <div>
-                  <dt className="text-sm font-medium text-muted-foreground mb-2">
-                    Allowed Domains
-                  </dt>
-                  <dd className="flex flex-wrap gap-1">
-                    {application.settings.allowed_domains.map((domain) => (
-                      <Badge key={domain} variant="secondary">
-                        {domain}
-                      </Badge>
-                    ))}
-                  </dd>
-                </div>
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <Shield className="h-4 w-4" />
+                      Allowed Domains
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {application.settings.allowed_domains.map((domain) => (
+                        <Badge
+                          key={domain}
+                          variant="secondary"
+                          className="px-3 py-1"
+                        >
+                          {domain}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Bug reports will only be accepted from these domains
+                    </p>
+                  </div>
+                </>
               )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>API Configuration</CardTitle>
-            <CardDescription>Use this API key in your SDK integration</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ApiKeyDisplay apiKey={application.api_key} />
-          </CardContent>
-        </Card>
-      </div>
+        {/* API Configuration */}
+        <div className="space-y-6">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <div className="rounded-md bg-blue-500/10 p-2">
+                  <Shield className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle>API Configuration</CardTitle>
+                  <CardDescription>SDK integration credentials</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ApiKeyDisplay apiKey={application.api_key} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Button variant="outline" className="w-full" asChild>
-            <Link href={`/org/${slug}/bugs?app=${appSlug}`}>View Bug Reports</Link>
-          </Button>
-          <Button variant="outline" className="w-full" asChild>
-            <Link href={`/org/${slug}/apps/${appSlug}/edit`}>
-              <Settings className="mr-2 h-4 w-4" />
-              Edit Settings
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
+              <div className="mt-6 rounded-lg bg-blue-50 dark:bg-blue-950/20 p-4 border border-blue-200 dark:border-blue-900">
+                <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  SDK Integration
+                </h4>
+                <p className="text-xs text-blue-800 dark:text-blue-200 mb-3">
+                  Use this API key to integrate the bug reporter SDK into your application:
+                </p>
+                <code className="block bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-100 p-3 rounded text-xs overflow-x-auto">
+                  {`<BugReporterProvider
+  apiKey="${application.api_key}"
+  apiUrl="https://your-platform.com"
+>`}
+                </code>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions Card */}
+          <Card className="border-l-4 border-l-green-500">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <div className="rounded-md bg-green-500/10 p-2">
+                  <Bug className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <CardTitle>Quick Actions</CardTitle>
+                  <CardDescription>Common tasks and operations</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                asChild
+              >
+                <Link href={`/org/${slug}/bugs?app=${appSlug}`}>
+                  <div className="flex items-start gap-3 text-left">
+                    <FileText className="h-5 w-5 mt-0.5 text-primary" />
+                    <div className="flex-1">
+                      <div className="font-semibold">View All Bug Reports</div>
+                      <div className="text-xs text-muted-foreground">
+                        Browse and manage reported bugs
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                asChild
+              >
+                <Link href={`/org/${slug}/apps/${appSlug}/edit`}>
+                  <div className="flex items-start gap-3 text-left">
+                    <Settings className="h-5 w-5 mt-0.5 text-primary" />
+                    <div className="flex-1">
+                      <div className="font-semibold">Edit Settings</div>
+                      <div className="text-xs text-muted-foreground">
+                        Configure domains and preferences
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                asChild
+              >
+                <a
+                  href={application.app_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="flex items-start gap-3 text-left">
+                    <ExternalLink className="h-5 w-5 mt-0.5 text-primary" />
+                    <div className="flex-1">
+                      <div className="font-semibold">Visit Application</div>
+                      <div className="text-xs text-muted-foreground">
+                        Open application in new tab
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

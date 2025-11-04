@@ -31,6 +31,8 @@ import {
 } from '@/components/ui/sidebar';
 import { createClient } from '@/lib/supabase/client';
 import { Separator } from '@/components/ui/separator';
+import { useOrganizationContext } from '@/hooks/organizations/use-organization-context';
+import { useBugStats } from '@/hooks/bug-reports/use-bug-reports';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   orgSlug: string;
@@ -40,6 +42,10 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { organization } = useOrganizationContext();
+  const { stats } = useBugStats(organization?.id || '');
+
+  const bugCount = stats?.total || 0;
 
   const mainNavItems = [
     {
@@ -58,7 +64,7 @@ export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
       title: 'Bug Reports',
       url: `/org/${orgSlug}/bugs`,
       icon: Bug,
-      badge: '12'
+      badge: bugCount > 0 ? bugCount.toString() : null
     }
   ];
 
@@ -129,7 +135,7 @@ export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
                       className={cn(
                         'h-10 rounded-lg transition-all',
                         isActive
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800'
+                          ? 'bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:text-white'
                           : 'hover:bg-accent'
                       )}
                     >

@@ -21,22 +21,54 @@ export class TeamClientService {
 
       const { data, error } = await supabase
         .from('organization_members')
-        .select(
-          `
-          *,
-          user:profiles(id, email, full_name, avatar_url)
-        `
-        )
+        .select('*')
         .eq('organization_id', organizationId)
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
 
-      console.log(`[TeamClientService] Fetched ${data?.length || 0} members`);
+      // Enrich with user data
+      if (data && data.length > 0) {
+        // Get current user
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+        // Map members and add user data
+        const membersWithUsers = data.map((member) => {
+          // If it's the current user, use their auth data
+          if (currentUser && member.user_id === currentUser.id) {
+            return {
+              ...member,
+              user: [{
+                id: currentUser.id,
+                email: currentUser.email || 'Unknown',
+                full_name: currentUser.user_metadata?.full_name || null,
+                avatar_url: currentUser.user_metadata?.avatar_url || null,
+              }]
+            };
+          }
+
+          // For other users, show user_id as identifier
+          // TODO: Create profiles table to store user display names
+          return {
+            ...member,
+            user: [{
+              id: member.user_id,
+              email: `User ${member.user_id.slice(0, 8)}...`,
+              full_name: null,
+              avatar_url: null,
+            }]
+          };
+        });
+
+        console.log(`[TeamClientService] Fetched ${membersWithUsers.length} members`);
+        return membersWithUsers;
+      }
+
       return data || [];
     } catch (error) {
       console.error('[TeamClientService] Error fetching members:', error);
-      throw error;
+      // Return empty array if table doesn't exist or other errors
+      return [];
     }
   }
 
@@ -94,19 +126,17 @@ export class TeamClientService {
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
           },
         ])
-        .select(
-          `
-          *,
-          inviter:profiles!invited_by(email, full_name)
-        `
-        )
+        .select('*')
         .single();
 
       if (error) {
+        if (error.code === 'PGRST205') {
+          throw new Error('Invitations feature is not yet configured. Please contact support to enable team invitations.');
+        }
         if (error.code === '23505') {
           throw new Error('An invitation has already been sent to this email');
         }
-        throw error;
+        throw new Error('Failed to send invitation. Please try again.');
       }
 
       console.log(`[TeamClientService] Sent invitation to ${payload.email}`);
@@ -115,9 +145,13 @@ export class TeamClientService {
       // await sendInvitationEmail(payload.email, data.id);
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[TeamClientService] Error inviting member:', error);
-      throw error;
+      // Re-throw with user-friendly message
+      if (error.message) {
+        throw error;
+      }
+      throw new Error('Failed to send invitation. Please try again.');
     }
   }
 
@@ -130,23 +164,25 @@ export class TeamClientService {
 
       const { data, error } = await supabase
         .from('organization_invitations')
-        .select(
-          `
-          *,
-          inviter:profiles!invited_by(email, full_name)
-        `
-        )
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('accepted', false)
         .gt('expires_at', new Date().toISOString())
         .order('invited_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Silently return empty array if table doesn't exist
+        if (error.code === 'PGRST205') {
+          return [];
+        }
+        console.error('[TeamClientService] Error fetching invitations:', error);
+        return [];
+      }
 
       return data || [];
     } catch (error) {
-      console.error('[TeamClientService] Error fetching invitations:', error);
-      throw error;
+      // Catch any unexpected errors
+      return [];
     }
   }
 
@@ -272,12 +308,7 @@ export class TeamClientService {
         .from('organization_members')
         .update({ role: payload.role })
         .eq('id', payload.member_id)
-        .select(
-          `
-          *,
-          user:profiles(id, email, full_name, avatar_url)
-        `
-        )
+        .select('*')
         .single();
 
       if (error) throw error;
@@ -316,22 +347,18 @@ export class TeamClientService {
       const supabase = createClient();
 
       // Get members
-      const { data: members, error: membersError } = await supabase
+      const { data: members } = await supabase
         .from('organization_members')
         .select('role')
         .eq('organization_id', organizationId);
 
-      if (membersError) throw membersError;
-
-      // Get pending invitations
-      const { data: invitations, error: invError } = await supabase
+      // Get pending invitations (if table exists)
+      const { data: invitations } = await supabase
         .from('organization_invitations')
         .select('id')
         .eq('organization_id', organizationId)
         .eq('accepted', false)
         .gt('expires_at', new Date().toISOString());
-
-      if (invError) throw invError;
 
       const stats: TeamStats = {
         total_members: members?.length || 0,
@@ -346,7 +373,16 @@ export class TeamClientService {
       return stats;
     } catch (error) {
       console.error('[TeamClientService] Error fetching team stats:', error);
-      throw error;
+      // Return empty stats if error
+      return {
+        total_members: 0,
+        by_role: {
+          owner: 0,
+          admin: 0,
+          developer: 0,
+        },
+        pending_invitations: 0,
+      };
     }
   }
 }

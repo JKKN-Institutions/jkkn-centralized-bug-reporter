@@ -29,7 +29,15 @@ export class BugReportServerService {
         throw error;
       }
 
-      return data;
+      // Extract metadata fields to top level
+      const transformedData = {
+        ...data,
+        title: data.metadata?.title || 'Untitled',
+        reporter_name: data.metadata?.reporter_name || null,
+        reporter_email: data.metadata?.reporter_email || null,
+      };
+
+      return transformedData;
     } catch (error) {
       console.error('[BugReportServerService] Error fetching bug report by ID:', error);
       throw error;

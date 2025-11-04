@@ -1,7 +1,13 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -12,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApplicationForm } from '../../_components/application-form';
@@ -21,7 +27,7 @@ import {
   useApplication,
   useUpdateApplication,
   useDeleteApplication,
-  useRegenerateApiKey,
+  useRegenerateApiKey
 } from '@/hooks/applications/use-applications';
 import { useOrganizationContext } from '@/hooks/organizations/use-organization-context';
 import { Trash2, RefreshCw } from 'lucide-react';
@@ -32,9 +38,14 @@ export default function EditApplicationPage() {
   const appSlug = params?.appSlug as string;
 
   const { organization, loading: orgLoading } = useOrganizationContext();
-  const { application, loading: appLoading } = useApplication(organization?.id || '', appSlug);
+  const { application, loading: appLoading } = useApplication(
+    organization?.id || '',
+    appSlug
+  );
   const { updateApplication, updating } = useUpdateApplication();
-  const { deleteApplication, deleting } = useDeleteApplication(organization?.slug || '');
+  const { deleteApplication, deleting } = useDeleteApplication(
+    organization?.slug || ''
+  );
   const { regenerateApiKey, regenerating } = useRegenerateApiKey();
 
   const [currentApiKey, setCurrentApiKey] = useState<string | null>(null);
@@ -43,9 +54,9 @@ export default function EditApplicationPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl space-y-6">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-96 w-full" />
+      <div className='max-w-2xl space-y-6'>
+        <Skeleton className='h-12 w-full' />
+        <Skeleton className='h-96 w-full' />
       </div>
     );
   }
@@ -72,10 +83,12 @@ export default function EditApplicationPage() {
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className='max-w-7xl space-y-6'>
       <div>
-        <h1 className="text-3xl font-bold">Edit Application</h1>
-        <p className="text-muted-foreground">Update your application settings</p>
+        <h1 className='text-3xl font-bold'>Edit Application</h1>
+        <p className='text-muted-foreground'>
+          Update your application settings
+        </p>
       </div>
 
       <Card>
@@ -89,7 +102,7 @@ export default function EditApplicationPage() {
             onSubmit={async (values) => {
               await updateApplication({
                 id: application.id,
-                ...values,
+                ...values
               });
             }}
             submitLabel={updating ? 'Saving...' : 'Save Changes'}
@@ -104,13 +117,17 @@ export default function EditApplicationPage() {
             View and regenerate your application API key
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           <ApiKeyDisplay apiKey={currentApiKey || application.api_key} />
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" disabled={regenerating}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
+              <Button variant='outline' disabled={regenerating}>
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${
+                    regenerating ? 'animate-spin' : ''
+                  }`}
+                />
                 {regenerating ? 'Regenerating...' : 'Regenerate API Key'}
               </Button>
             </AlertDialogTrigger>
@@ -118,8 +135,8 @@ export default function EditApplicationPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Regenerate API Key?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will generate a new API key and invalidate the old one. Make sure to
-                  update your SDK integration with the new key.
+                  This will generate a new API key and invalidate the old one.
+                  Make sure to update your SDK integration with the new key.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -133,9 +150,9 @@ export default function EditApplicationPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-destructive">
+      <Card className='border-destructive'>
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardTitle className='text-destructive'>Danger Zone</CardTitle>
           <CardDescription>
             Permanently delete this application and all associated data
           </CardDescription>
@@ -143,8 +160,8 @@ export default function EditApplicationPage() {
         <CardContent>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={deleting}>
-                <Trash2 className="mr-2 h-4 w-4" />
+              <Button variant='destructive' disabled={deleting}>
+                <Trash2 className='mr-2 h-4 w-4' />
                 {deleting ? 'Deleting...' : 'Delete Application'}
               </Button>
             </AlertDialogTrigger>
@@ -152,13 +169,17 @@ export default function EditApplicationPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the application
-                  &quot;{application.name}&quot; and all bug reports associated with it.
+                  This action cannot be undone. This will permanently delete the
+                  application &quot;{application.name}&quot; and all bug reports
+                  associated with it.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className='bg-destructive'
+                >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>

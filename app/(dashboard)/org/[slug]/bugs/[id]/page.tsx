@@ -11,6 +11,7 @@ import { useBugReport } from '@/hooks/bug-reports/use-bug-reports';
 import { useOrganizationContext } from '@/hooks/organizations/use-organization-context';
 import { BugStatusBadge } from '../_components/bug-status-badge';
 import { BugReportClientService } from '@/lib/services/bug-reports/client';
+import { ConsoleLogsSection } from './_components/console-logs-section';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -194,49 +195,7 @@ export default function BugDetailPage() {
       )}
 
       {bug.console_logs && bug.console_logs.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Console Logs</CardTitle>
-            <CardDescription>{bug.console_logs.length} log entry(ies)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {bug.console_logs.map((log: any, index: number) => {
-                const logType = log.type || log.level || 'log';
-                const logMessage = log.message || log.text || JSON.stringify(log);
-                const timestamp = log.timestamp || '';
-
-                // Color code by log type
-                const typeColors: Record<string, string> = {
-                  error: 'text-red-600 dark:text-red-400',
-                  warn: 'text-yellow-600 dark:text-yellow-400',
-                  info: 'text-blue-600 dark:text-blue-400',
-                  log: 'text-muted-foreground',
-                  debug: 'text-purple-600 dark:text-purple-400',
-                };
-
-                return (
-                  <div
-                    key={index}
-                    className="font-mono text-xs p-2 rounded bg-muted/50 border"
-                  >
-                    <div className="flex items-start gap-2">
-                      <span className={`font-semibold uppercase min-w-[50px] ${typeColors[logType] || typeColors.log}`}>
-                        {logType}:
-                      </span>
-                      <span className="flex-1 break-all">{logMessage}</span>
-                    </div>
-                    {timestamp && (
-                      <div className="text-[10px] text-muted-foreground mt-1 ml-[58px]">
-                        {new Date(timestamp).toLocaleString()}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <ConsoleLogsSection logs={bug.console_logs} />
       )}
 
       {bug.messages && bug.messages.length > 0 && (

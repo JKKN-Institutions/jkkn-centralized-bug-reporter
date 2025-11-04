@@ -58,8 +58,16 @@ export class BugReportClientService {
       const { data, error, count } = await query;
       if (error) throw error;
 
-      console.log(`[BugReportClientService] Fetched ${data?.length || 0} bugs (total: ${count})`);
-      return { data: data || [], total: count || 0, page, pageSize };
+      // Extract metadata fields to top level for easier access
+      const transformedData = data?.map((bug: any) => ({
+        ...bug,
+        title: bug.metadata?.title || 'Untitled',
+        reporter_name: bug.metadata?.reporter_name || null,
+        reporter_email: bug.metadata?.reporter_email || null,
+      })) || [];
+
+      console.log(`[BugReportClientService] Fetched ${transformedData.length} bugs (total: ${count})`);
+      return { data: transformedData, total: count || 0, page, pageSize };
     } catch (error) {
       console.error('[BugReportClientService] Error fetching bug reports:', error);
       throw error;
@@ -93,7 +101,15 @@ export class BugReportClientService {
         throw error;
       }
 
-      return data;
+      // Extract metadata fields to top level
+      const transformedData = {
+        ...data,
+        title: data.metadata?.title || 'Untitled',
+        reporter_name: data.metadata?.reporter_name || null,
+        reporter_email: data.metadata?.reporter_email || null,
+      };
+
+      return transformedData;
     } catch (error) {
       console.error('[BugReportClientService] Error fetching bug report by ID:', error);
       throw error;
@@ -284,7 +300,7 @@ export class BugReportClientService {
 
       const { data: bugs, error } = await supabase
         .from('bug_reports')
-        .select('status, category, priority, created_at')
+        .select('status, category, created_at')
         .eq('organization_id', organizationId);
 
       if (error) throw error;
@@ -292,16 +308,16 @@ export class BugReportClientService {
       const stats: BugReportStats = {
         total: bugs?.length || 0,
         by_status: {
-          open: bugs?.filter((b) => b.status === 'open').length || 0,
+          open: bugs?.filter((b) => b.status === 'open' || b.status === 'new').length || 0,
           in_progress: bugs?.filter((b) => b.status === 'in_progress').length || 0,
           resolved: bugs?.filter((b) => b.status === 'resolved').length || 0,
-          closed: bugs?.filter((b) => b.status === 'closed').length || 0,
+          closed: bugs?.filter((b) => b.status === 'closed' || b.status === 'wont_fix').length || 0,
         },
         by_priority: {
-          low: bugs?.filter((b) => b.priority === 'low').length || 0,
-          medium: bugs?.filter((b) => b.priority === 'medium').length || 0,
-          high: bugs?.filter((b) => b.priority === 'high').length || 0,
-          critical: bugs?.filter((b) => b.priority === 'critical').length || 0,
+          low: 0,
+          medium: 0,
+          high: 0,
+          critical: 0,
         },
         by_category: {
           ui: bugs?.filter((b) => b.category === 'ui').length || 0,
