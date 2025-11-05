@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { OrganizationClientService } from '@/lib/services/organizations/client';
+import { createOrganizationAction } from '@/lib/actions/organizations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -98,47 +98,54 @@ export default function SignupPage() {
         return;
       }
 
-      // Step 2: Create organization (trigger will add user as owner)
+      // CRITICAL: Check if session was created
+      if (!authData.session) {
+        setError('Session was not created. Please try logging in.');
+        setLoading(false);
+        return;
+      }
+
+      // IMPORTANT: Wait for session to be fully persisted to storage
+      // This prevents race condition between signUp and createOrganization
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Verify session is accessible before proceeding
+      const { data: { session: verifiedSession } } = await supabase.auth.getSession();
+      if (!verifiedSession) {
+        setError('Session not available. Please try logging in.');
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Create organization using Server Action (proper auth context)
       const orgSlug = generateSlug(formData.organizationName);
 
-      try {
-        const org = await OrganizationClientService.createOrganization({
-          name: formData.organizationName.trim(),
-          slug: orgSlug
-        });
+      console.log('[Signup] Calling server action to create organization');
 
-        // Success! Redirect to verify email or organization dashboard
-        if (authData.user.email_confirmed_at) {
-          router.push(`/org/${orgSlug}`);
-        } else {
-          router.push(
-            '/verify-email?email=' + encodeURIComponent(formData.email)
-          );
-        }
-        router.refresh();
-      } catch (orgError: unknown) {
-        if (orgError instanceof Error) {
-          console.error(
-            '[Signup] Organization creation error:',
-            orgError.message
-          );
-        } else {
-          console.error(
-            '[Signup] Organization creation error:',
-            String(orgError)
-          );
-        }
-        // Organization creation failed, but user was created
-        // Redirect to create org page
-        if (authData.user.email_confirmed_at) {
-          router.push('/org/new');
-        } else {
-          router.push(
-            '/verify-email?email=' + encodeURIComponent(formData.email)
-          );
-        }
-        router.refresh();
+      const { data: org, error: orgError } = await createOrganizationAction({
+        name: formData.organizationName.trim(),
+        slug: orgSlug
+      });
+
+      if (orgError || !org) {
+        console.error('[Signup] Organization creation error:', orgError);
+        setError(orgError || 'Failed to create organization');
+        setLoading(false);
+        return;
       }
+
+      console.log('[Signup] Organization created successfully:', org.slug);
+
+      // Success! Redirect to verify email or organization dashboard
+      // Use window.location for hard redirect after server action
+      const redirectUrl = authData.user.email_confirmed_at
+        ? `/org/${orgSlug}`
+        : `/verify-email?email=${encodeURIComponent(formData.email)}`;
+
+      console.log('[Signup] Redirecting to:', redirectUrl);
+
+      // Hard redirect to ensure clean navigation
+      window.location.href = redirectUrl;
     } catch (err) {
       console.error('[Signup] Unexpected error:', err);
       setError('An unexpected error occurred. Please try again.');

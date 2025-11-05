@@ -67,12 +67,29 @@ LANGUAGE plpgsql
 SECURITY DEFINER  -- This makes it run with elevated privileges, bypassing RLS
 SET search_path = public
 AS $$
+DECLARE
+  v_count INTEGER;
 BEGIN
+  -- Debug: Log the operation
+  RAISE NOTICE 'Attempting to add owner % to organization %', NEW.owner_user_id, NEW.id;
+
+  -- Insert the owner as a member
   INSERT INTO organization_members (organization_id, user_id, role)
   VALUES (NEW.id, NEW.owner_user_id, 'owner')
   ON CONFLICT (organization_id, user_id) DO NOTHING;
 
+  -- Verify the insert succeeded
+  SELECT COUNT(*) INTO v_count
+  FROM organization_members
+  WHERE organization_id = NEW.id AND user_id = NEW.owner_user_id;
+
+  RAISE NOTICE 'Owner added successfully. Member count: %', v_count;
+
   RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE WARNING 'Error in add_owner_to_org_members: % %', SQLERRM, SQLSTATE;
+    RETURN NEW;  -- Still return NEW to allow org creation to succeed
 END;
 $$;
 

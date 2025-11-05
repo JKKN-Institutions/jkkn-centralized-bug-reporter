@@ -92,14 +92,26 @@ export class OrganizationClientService {
     try {
       const supabase = createClient();
 
+      // CRITICAL: Check both user and session
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
 
       if (authError || !user) {
+        console.error('[organizations] Auth error:', authError);
         throw new Error('Not authenticated');
       }
+
+      // Verify session exists
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error('[organizations] Session error:', sessionError);
+        throw new Error('No active session. Please log in again.');
+      }
+
+      console.log('[organizations] User authenticated:', user.id);
+      console.log('[organizations] Session verified:', session.access_token ? 'Present' : 'Missing');
 
       // Check if slug is available
       const { data: existing } = await supabase
@@ -112,6 +124,9 @@ export class OrganizationClientService {
         throw new Error('Organization slug already exists');
       }
 
+      // Insert organization with explicit user ID
+      console.log('[organizations] Attempting to create org with owner:', user.id);
+
       const { data, error } = await supabase
         .from('organizations')
         .insert([
@@ -123,7 +138,21 @@ export class OrganizationClientService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[organizations] Insert error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+
+        // Provide more helpful error messages
+        if (error.code === '42501') {
+          throw new Error('Permission denied. Your session may have expired. Please try logging in again.');
+        }
+
+        throw error;
+      }
 
       console.log('[organizations] Created organization:', data.slug);
       return data;

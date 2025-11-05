@@ -77,9 +77,19 @@ CREATE POLICY "members_view_members"
   );
 
 -- Owners and admins can add members
+-- NOTE: This policy allows the trigger to insert the first owner member
+-- by checking if the user is the owner of the organization being created
 CREATE POLICY "owners_admins_add_members"
   ON organization_members FOR INSERT
   WITH CHECK (
+    -- Allow if user is owner of the organization (for initial member creation via trigger)
+    EXISTS (
+      SELECT 1 FROM organizations
+      WHERE id = organization_members.organization_id
+      AND owner_user_id = auth.uid()
+    )
+    OR
+    -- Allow if user is already an owner/admin of the organization
     organization_id IN (
       SELECT organization_id
       FROM organization_members
