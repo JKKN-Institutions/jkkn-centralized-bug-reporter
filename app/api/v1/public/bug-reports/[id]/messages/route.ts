@@ -21,9 +21,10 @@ export const POST = withApiKeyAuth(
   async (
     request: NextRequest,
     context: ApiRequestContext,
-    { params }: { params: { id: string } }
+    routeContext?: { params: Promise<Record<string, string>> }
   ) => {
     try {
+      const params = await routeContext!.params;
       const { id: bugReportId } = params;
 
       // Parse request body

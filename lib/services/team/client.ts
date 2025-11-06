@@ -19,52 +19,55 @@ export class TeamClientService {
     try {
       const supabase = createClient();
 
-      const { data, error } = await supabase
+      // Fetch organization members
+      const { data: members, error: membersError } = await supabase
         .from('organization_members')
         .select('*')
         .eq('organization_id', organizationId)
         .order('joined_at', { ascending: false });
 
-      if (error) throw error;
+      if (membersError) throw membersError;
 
-      // Enrich with user data
-      if (data && data.length > 0) {
-        // Get current user
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-
-        // Map members and add user data
-        const membersWithUsers = data.map((member) => {
-          // If it's the current user, use their auth data
-          if (currentUser && member.user_id === currentUser.id) {
-            return {
-              ...member,
-              user: [{
-                id: currentUser.id,
-                email: currentUser.email || 'Unknown',
-                full_name: currentUser.user_metadata?.full_name || null,
-                avatar_url: currentUser.user_metadata?.avatar_url || null,
-              }]
-            };
-          }
-
-          // For other users, show user_id as identifier
-          // TODO: Create profiles table to store user display names
-          return {
-            ...member,
-            user: [{
-              id: member.user_id,
-              email: `User ${member.user_id.slice(0, 8)}...`,
-              full_name: null,
-              avatar_url: null,
-            }]
-          };
-        });
-
-        console.log(`[TeamClientService] Fetched ${membersWithUsers.length} members`);
-        return membersWithUsers;
+      if (!members || members.length === 0) {
+        return [];
       }
 
-      return data || [];
+      // Get all unique user IDs
+      const userIds = [...new Set(members.map(m => m.user_id))];
+
+      // Fetch all profiles for these users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('[TeamClientService] Error fetching profiles:', profilesError);
+        // Continue without profiles
+      }
+
+      // Create a map of profiles by user ID
+      const profilesMap = new Map(
+        (profiles || []).map(p => [p.id, p])
+      );
+
+      // Merge members with their profiles
+      const membersWithUsers = members.map((member) => {
+        const profile = profilesMap.get(member.user_id);
+
+        return {
+          ...member,
+          user: profile ? [profile] : [{
+            id: member.user_id,
+            email: 'Unknown User',
+            full_name: null,
+            avatar_url: null,
+          }]
+        };
+      });
+
+      console.log(`[TeamClientService] Fetched ${membersWithUsers.length} members with profiles`);
+      return membersWithUsers;
     } catch (error) {
       console.error('[TeamClientService] Error fetching members:', error);
       // Return empty array if table doesn't exist or other errors
@@ -145,10 +148,10 @@ export class TeamClientService {
       // await sendInvitationEmail(payload.email, data.id);
 
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('[TeamClientService] Error inviting member:', error);
       // Re-throw with user-friendly message
-      if (error.message) {
+      if (error instanceof Error && error.message) {
         throw error;
       }
       throw new Error('Failed to send invitation. Please try again.');
@@ -180,7 +183,7 @@ export class TeamClientService {
       }
 
       return data || [];
-    } catch (error) {
+    } catch {
       // Catch any unexpected errors
       return [];
     }

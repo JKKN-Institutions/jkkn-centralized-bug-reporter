@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import type {
-  ApiResponse,
-  ApiRequestContext,
-  API_ERROR_CODES,
-} from '@bug-reporter/shared';
+import type { ApiResponse, ApiRequestContext } from '@bug-reporter/shared';
 
 /**
  * API Key Authentication Middleware
@@ -30,7 +26,8 @@ export async function validateApiKey(
 ): Promise<ApiKeyAuthResult> {
   try {
     // Extract API key from headers
-    const apiKey = request.headers.get('X-API-Key') || request.headers.get('x-api-key');
+    const apiKey =
+      request.headers.get('X-API-Key') || request.headers.get('x-api-key');
 
     if (!apiKey) {
       return {
@@ -38,8 +35,8 @@ export async function validateApiKey(
         error: {
           code: 'MISSING_API_KEY',
           message: 'API key is required. Provide it in the X-API-Key header.',
-          status: 401,
-        },
+          status: 401
+        }
       };
     }
 
@@ -50,8 +47,8 @@ export async function validateApiKey(
       {
         auth: {
           autoRefreshToken: false,
-          persistSession: false,
-        },
+          persistSession: false
+        }
       }
     );
 
@@ -83,8 +80,8 @@ export async function validateApiKey(
         error: {
           code: 'INVALID_API_KEY',
           message: 'Invalid API key provided.',
-          status: 401,
-        },
+          status: 401
+        }
       };
     }
 
@@ -99,8 +96,8 @@ export async function validateApiKey(
         error: {
           code: 'ORGANIZATION_NOT_FOUND',
           message: 'Organization associated with this API key not found.',
-          status: 404,
-        },
+          status: 404
+        }
       };
     }
 
@@ -112,26 +109,26 @@ export async function validateApiKey(
         organization_id: application.organization_id,
         key_prefix: apiKey.substring(0, 8) + '...',
         is_active: true,
-        created_at: application.created_at,
+        created_at: application.created_at
       },
       application: {
         id: application.id,
         name: application.name,
         slug: application.slug,
-        organization_id: application.organization_id,
+        organization_id: application.organization_id
       },
       organization: {
         id: organization.id,
         name: organization.name,
-        slug: organization.slug,
+        slug: organization.slug
       },
       request_ip: request.headers.get('x-forwarded-for') || undefined,
-      user_agent: request.headers.get('user-agent') || undefined,
+      user_agent: request.headers.get('user-agent') || undefined
     };
 
     console.log('[ApiKeyAuth] API key validated:', {
       application: application.name,
-      organization: organization.name,
+      organization: organization.name
     });
 
     // Update last_used_at (optional, fire and forget)
@@ -143,7 +140,7 @@ export async function validateApiKey(
 
     return {
       success: true,
-      context,
+      context
     };
   } catch (error) {
     console.error('[ApiKeyAuth] Unexpected error:', error);
@@ -152,8 +149,8 @@ export async function validateApiKey(
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Internal server error during API key validation.',
-        status: 500,
-      },
+        status: 500
+      }
     };
   }
 }
@@ -161,19 +158,19 @@ export async function validateApiKey(
 /**
  * Create error response for API
  */
-export function createApiErrorResponse<T = any>(
+export function createApiErrorResponse<T = unknown>(
   code: string,
   message: string,
   status: number = 400,
-  details?: any
+  details?: Record<string, unknown>
 ): NextResponse<ApiResponse<T>> {
   const response: ApiResponse<T> = {
     success: false,
     error: {
       code,
       message,
-      details,
-    },
+      details
+    }
   };
 
   return NextResponse.json(response, {
@@ -181,7 +178,7 @@ export function createApiErrorResponse<T = any>(
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, x-api-key',
+      'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, x-api-key'
     }
   });
 }
@@ -189,13 +186,13 @@ export function createApiErrorResponse<T = any>(
 /**
  * Create success response for API
  */
-export function createApiSuccessResponse<T = any>(
+export function createApiSuccessResponse<T = unknown>(
   data: T,
   status: number = 200
 ): NextResponse<ApiResponse<T>> {
   const response: ApiResponse<T> = {
     success: true,
-    data,
+    data
   };
 
   return NextResponse.json(response, {
@@ -203,7 +200,7 @@ export function createApiSuccessResponse<T = any>(
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, x-api-key',
+      'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, x-api-key'
     }
   });
 }
@@ -212,16 +209,16 @@ export function createApiSuccessResponse<T = any>(
  * Middleware wrapper for API routes
  * Validates API key and passes context to handler
  */
-export function withApiKeyAuth<T = any>(
+export function withApiKeyAuth<T = unknown>(
   handler: (
     request: NextRequest,
     context: ApiRequestContext,
-    routeContext?: any
+    routeContext?: { params: Promise<Record<string, string>> }
   ) => Promise<NextResponse<ApiResponse<T>>>
 ) {
   return async (
     request: NextRequest,
-    routeContext?: any
+    routeContext?: { params: Promise<Record<string, string>> }
   ): Promise<NextResponse<ApiResponse<T>>> => {
     const authResult = await validateApiKey(request);
 

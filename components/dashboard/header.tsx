@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, User, Settings } from 'lucide-react';
+import { Bell, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -14,14 +14,18 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 
 export function DashboardHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  // Extract org slug from pathname (e.g., /org/my-org/... => my-org)
+  const orgSlug = pathname?.match(/\/org\/([^\/]+)/)?.[1] || '';
 
   useEffect(() => {
     const getUser = async () => {
@@ -102,13 +106,11 @@ export function DashboardHeader() {
           <DropdownMenuContent align='end' className='w-56'>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => router.push(orgSlug ? `/org/${orgSlug}/profile` : '/profile')}
+            >
               <User className='mr-2 h-4 w-4' />
               <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className='mr-2 h-4 w-4' />
-              <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className='text-red-600'>

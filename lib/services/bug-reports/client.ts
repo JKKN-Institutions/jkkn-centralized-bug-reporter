@@ -9,6 +9,14 @@ import type {
   BugReportStats,
 } from '@bug-reporter/shared';
 
+interface BugReportQueryResult extends Omit<BugReport, 'title' | 'reporter_name' | 'reporter_email'> {
+  metadata?: {
+    title?: string;
+    reporter_name?: string;
+    reporter_email?: string;
+  };
+}
+
 export class BugReportClientService {
   /**
    * Get bug reports with advanced filtering and pagination
@@ -59,12 +67,12 @@ export class BugReportClientService {
       if (error) throw error;
 
       // Extract metadata fields to top level for easier access
-      const transformedData = data?.map((bug: any) => ({
+      const transformedData: BugReport[] = (data?.map((bug: BugReportQueryResult) => ({
         ...bug,
         title: bug.metadata?.title || 'Untitled',
         reporter_name: bug.metadata?.reporter_name || null,
         reporter_email: bug.metadata?.reporter_email || null,
-      })) || [];
+      })) || []) as BugReport[];
 
       console.log(`[BugReportClientService] Fetched ${transformedData.length} bugs (total: ${count})`);
       return { data: transformedData, total: count || 0, page, pageSize };
@@ -123,15 +131,14 @@ export class BugReportClientService {
     try {
       const supabase = createClient();
 
-      const updateData: any = {
+      const updateData: { status: string; resolved_at: string | null } = {
         status,
+        resolved_at: null,
       };
 
       // Set resolved_at timestamp when status is 'resolved' or 'wont_fix'
       if (status === 'resolved' || status === 'wont_fix') {
         updateData.resolved_at = new Date().toISOString();
-      } else {
-        updateData.resolved_at = null;
       }
 
       const { data, error } = await supabase
@@ -348,14 +355,13 @@ export class BugReportClientService {
     try {
       const supabase = createClient();
 
-      const updateData: any = {
+      const updateData: { status: string; resolved_at: string | null } = {
         status,
+        resolved_at: null,
       };
 
       if (status === 'resolved' || status === 'wont_fix') {
         updateData.resolved_at = new Date().toISOString();
-      } else {
-        updateData.resolved_at = null;
       }
 
       const { error } = await supabase.from('bug_reports').update(updateData).in('id', bugIds);

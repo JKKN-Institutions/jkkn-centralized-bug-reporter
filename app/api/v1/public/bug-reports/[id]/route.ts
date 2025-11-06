@@ -10,7 +10,34 @@ import type {
   ApiRequestContext,
   BugReport,
   EnhancedBugReportMessage,
+  MessageAttachment,
+  MessageReaction,
 } from '@bug-reporter/shared';
+
+interface MessageQueryResult {
+  id: string;
+  bug_report_id: string;
+  sender_user_id: string;
+  message_text: string;
+  message_type: string;
+  created_at: string;
+  updated_at: string;
+  attachments: MessageAttachment[];
+  reactions: MessageReaction[];
+  sender:
+    | {
+        id: string;
+        email: string;
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }
+    | {
+        id: string;
+        email: string;
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }[];
+}
 
 /**
  * GET /api/v1/public/bug-reports/:id
@@ -24,9 +51,10 @@ export const GET = withApiKeyAuth(
   async (
     request: NextRequest,
     context: ApiRequestContext,
-    { params }: { params: { id: string } }
+    routeContext?: { params: Promise<Record<string, string>> }
   ) => {
     try {
+      const params = await routeContext!.params;
       const { id } = params;
       const { searchParams } = new URL(request.url);
       const includeMessages = searchParams.get('include_messages') !== 'false';
@@ -94,7 +122,7 @@ export const GET = withApiKeyAuth(
           console.error('[BugReportAPI /:id] Messages fetch error:', messagesError);
           // Don't fail the request, just log and continue with empty messages
         } else {
-          messages = (messagesData as any[])?.map((msg) => ({
+          messages = (messagesData as MessageQueryResult[])?.map((msg) => ({
             id: msg.id,
             bug_report_id: msg.bug_report_id,
             sender_user_id: msg.sender_user_id,

@@ -12,7 +12,8 @@ import {
   Settings,
   LogOut,
   Home,
-  Sparkles
+  Sparkles,
+  Shield
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Separator } from '@/components/ui/separator';
 import { useOrganizationContext } from '@/hooks/organizations/use-organization-context';
 import { useBugStats } from '@/hooks/bug-reports/use-bug-reports';
+import { useIsSuperAdmin } from '@/hooks/super-admins/use-super-admin-status';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   orgSlug: string;
@@ -42,10 +44,14 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { organization } = useOrganizationContext();
+  const { organization, userRole } = useOrganizationContext();
   const { stats } = useBugStats(organization?.id || '');
+  const isSuperAdmin = useIsSuperAdmin();
 
   const bugCount = stats?.total || 0;
+
+  // Only show settings for owner and admin roles
+  const canAccessSettings = userRole === 'owner' || userRole === 'admin';
 
   const mainNavItems = [
     {
@@ -213,33 +219,69 @@ export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
 
         <Separator className='my-4' />
 
-        {/* Settings */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className='space-y-1'>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip='Settings'
-                  className={cn(
-                    'h-10 rounded-lg transition-all',
-                    pathname.startsWith(`/org/${orgSlug}/settings`)
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800'
-                      : 'hover:bg-accent'
-                  )}
-                >
-                  <Link
-                    href={`/org/${orgSlug}/settings`}
-                    className='flex items-center gap-3'
+        {/* Super Admin Link (only for super admins) */}
+        {isSuperAdmin && (
+          <>
+            <SidebarGroup className='mb-4'>
+              <SidebarGroupLabel className='px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2'>
+                Administration
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className='space-y-1'>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip='Super Admin Dashboard'
+                      className={cn(
+                        'h-10 rounded-lg transition-all',
+                        pathname.startsWith('/admin')
+                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:from-purple-700 hover:to-purple-800'
+                          : 'hover:bg-accent'
+                      )}
+                    >
+                      <Link href='/admin/dashboard' className='flex items-center gap-3'>
+                        <Shield className='size-4' />
+                        <span className='font-medium'>Admin Panel</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <Separator className='my-4' />
+          </>
+        )}
+
+        {/* Settings (only for owner and admin) */}
+        {canAccessSettings && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu className='space-y-1'>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip='Settings'
+                    className={cn(
+                      'h-10 rounded-lg transition-all',
+                      pathname.startsWith(`/org/${orgSlug}/settings`)
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800'
+                        : 'hover:bg-accent'
+                    )}
                   >
-                    <Settings className='size-4' />
-                    <span className='font-medium'>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                    <Link
+                      href={`/org/${orgSlug}/settings`}
+                      className='flex items-center gap-3'
+                    >
+                      <Settings className='size-4' />
+                      <span className='font-medium'>Settings</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className='border-t p-3'>

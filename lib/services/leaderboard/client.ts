@@ -8,6 +8,12 @@ import type {
   LeaderboardTimePeriod,
 } from '@bug-reporter/shared';
 
+interface BugMetadata {
+  points?: number;
+}
+
+type Priority = 'critical' | 'high' | 'medium' | 'low';
+
 export class LeaderboardClientService {
   /**
    * Get leaderboard entries for organization
@@ -60,7 +66,7 @@ export class LeaderboardClientService {
         if (!userId) return;
 
         const user = userMap.get(userId);
-        const points = (bug.metadata as any)?.points || 0;
+        const points = (bug.metadata as BugMetadata)?.points || 0;
 
         const existing = leaderboardMap.get(userId);
         if (existing) {
@@ -178,23 +184,23 @@ export class LeaderboardClientService {
 
       if (!config) {
         // Default points if no config
-        const defaultPoints = {
+        const defaultPoints: Record<Priority, number> = {
           critical: 50,
           high: 30,
           medium: 20,
           low: 10,
         };
-        return (defaultPoints as any)[priority] || 10;
+        return defaultPoints[priority as Priority] || 10;
       }
 
-      const pointsMap = {
+      const pointsMap: Record<Priority, number> = {
         critical: config.points_critical,
         high: config.points_high,
         medium: config.points_medium,
         low: config.points_low,
       };
 
-      return (pointsMap as any)[priority] || config.points_low;
+      return pointsMap[priority as Priority] || config.points_low;
     } catch (error) {
       console.error('[LeaderboardClientService] Error calculating points:', error);
       return 10; // Fallback

@@ -5,6 +5,10 @@ import type {
   LeaderboardTimePeriod,
 } from '@bug-reporter/shared';
 
+interface BugMetadata {
+  points?: number;
+}
+
 export class LeaderboardServerService {
   /**
    * Get leaderboard entries for organization
@@ -57,7 +61,7 @@ export class LeaderboardServerService {
         if (!userId) return;
 
         const user = userMap.get(userId);
-        const points = (bug.metadata as any)?.points || 0;
+        const points = (bug.metadata as BugMetadata)?.points || 0;
 
         const existing = leaderboardMap.get(userId);
         if (existing) {

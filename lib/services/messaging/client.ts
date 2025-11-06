@@ -8,6 +8,17 @@ import type {
   SendMessagePayload,
 } from '@bug-reporter/shared';
 
+interface TypingUser {
+  user_id: string;
+  user: {
+    email: string;
+    full_name?: string | null;
+  } | {
+    email: string;
+    full_name?: string | null;
+  }[] | null;
+}
+
 export class MessagingClientService {
   /**
    * Send message with optional attachments
@@ -70,7 +81,7 @@ export class MessagingClientService {
       for (const file of files) {
         // Upload file to Supabase Storage
         const fileName = `${messageId}/${Date.now()}_${file.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('bug-attachments')
           .upload(fileName, file);
 
@@ -280,7 +291,7 @@ export class MessagingClientService {
   /**
    * Get typing users for a bug report
    */
-  static async getTypingUsers(bugReportId: string): Promise<any[]> {
+  static async getTypingUsers(bugReportId: string): Promise<TypingUser[]> {
     try {
       const supabase = createClient();
 

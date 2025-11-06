@@ -13,33 +13,54 @@ export function useTypingIndicator(bugReportId: string) {
   const supabase = createClient();
 
   // Fetch typing users
-  const fetchTypingUsers = useCallback(async () => {
-    if (!bugReportId) {
-      setTypingUsers([]);
-      return;
-    }
-
-    try {
-      const data = await MessagingClientService.getTypingUsers(bugReportId);
-      setTypingUsers(
-        data.map((item: any) => ({
-          user_id: item.user_id,
-          user_email: item.user?.email || '',
-          user_name: item.user?.full_name,
-        }))
-      );
-    } catch (error) {
-      console.error('[hooks/typing-indicator] Error fetching typing users:', error);
-    }
-  }, [bugReportId]);
-
   useEffect(() => {
+    const fetchTypingUsers = async () => {
+      if (!bugReportId) {
+        setTypingUsers([]);
+        return;
+      }
+
+      try {
+        const data = await MessagingClientService.getTypingUsers(bugReportId);
+        setTypingUsers(
+          data.map((item) => {
+            const user = Array.isArray(item.user) ? item.user[0] : item.user;
+            return {
+              user_id: item.user_id,
+              user_email: user?.email || '',
+              user_name: user?.full_name || undefined,
+            };
+          })
+        );
+      } catch (error) {
+        console.error('[hooks/typing-indicator] Error fetching typing users:', error);
+      }
+    };
+
     fetchTypingUsers();
-  }, [fetchTypingUsers]);
+  }, [bugReportId]);
 
   // Subscribe to typing changes
   useEffect(() => {
     if (!bugReportId) return;
+
+    const fetchTypingUsersForSubscription = async () => {
+      try {
+        const data = await MessagingClientService.getTypingUsers(bugReportId);
+        setTypingUsers(
+          data.map((item) => {
+            const user = Array.isArray(item.user) ? item.user[0] : item.user;
+            return {
+              user_id: item.user_id,
+              user_email: user?.email || '',
+              user_name: user?.full_name || undefined,
+            };
+          })
+        );
+      } catch (error) {
+        console.error('[hooks/typing-indicator] Error fetching typing users:', error);
+      }
+    };
 
     const channel = supabase
       .channel(`bug_typing:${bugReportId}`)
@@ -53,7 +74,7 @@ export function useTypingIndicator(bugReportId: string) {
         },
         () => {
           // Refetch typing users on any change
-          fetchTypingUsers();
+          fetchTypingUsersForSubscription();
         }
       )
       .subscribe();
@@ -61,7 +82,7 @@ export function useTypingIndicator(bugReportId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [bugReportId, fetchTypingUsers, supabase]);
+  }, [bugReportId, supabase]);
 
   const setTyping = useCallback(
     async (isTyping: boolean) => {
