@@ -189,7 +189,7 @@ export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
                       className={cn(
                         'h-10 rounded-lg transition-all',
                         isActive
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800 hover:text-white'
                           : 'hover:bg-accent'
                       )}
                     >
@@ -235,11 +235,14 @@ export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
                       className={cn(
                         'h-10 rounded-lg transition-all',
                         pathname.startsWith('/admin')
-                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:from-purple-700 hover:to-purple-800'
+                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:from-purple-700 hover:to-purple-800 hover:text-white'
                           : 'hover:bg-accent'
                       )}
                     >
-                      <Link href='/admin/dashboard' className='flex items-center gap-3'>
+                      <Link
+                        href='/admin/dashboard'
+                        className='flex items-center gap-3'
+                      >
                         <Shield className='size-4' />
                         <span className='font-medium'>Admin Panel</span>
                       </Link>
@@ -265,7 +268,7 @@ export function AppSidebar({ orgSlug, orgName, ...props }: AppSidebarProps) {
                     className={cn(
                       'h-10 rounded-lg transition-all',
                       pathname.startsWith(`/org/${orgSlug}/settings`)
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800 hover:text-white'
                         : 'hover:bg-accent'
                     )}
                   >

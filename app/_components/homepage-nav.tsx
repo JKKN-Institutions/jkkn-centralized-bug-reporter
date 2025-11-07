@@ -17,7 +17,9 @@ export function HomepageNav() {
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
 
       if (user) {
         setUser(user);
@@ -57,7 +59,10 @@ export function HomepageNav() {
     return (
       <nav className='flex items-center gap-3'>
         <Link href={`/org/${userOrg.slug}`}>
-          <Button size='sm' className='bg-gradient-to-r from-blue-600 to-blue-800 cursor-pointer'>
+          <Button
+            size='sm'
+            className='bg-gradient-to-r from-blue-600 to-blue-800 cursor-pointer'
+          >
             <LayoutDashboard className='h-4 w-4 mr-2' />
             Dashboard
           </Button>
@@ -78,16 +83,12 @@ export function HomepageNav() {
   return (
     <nav className='flex items-center gap-3'>
       <Link href='/login'>
-        <Button variant='ghost' size='sm' className='cursor-pointer'>
-          Sign in
-        </Button>
-      </Link>
-      <Link href='/signup'>
         <Button
+          variant='ghost'
           size='sm'
-          className='bg-gradient-to-r from-blue-600 to-blue-800 cursor-pointer'
+          className='cursor-pointer bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:text-white'
         >
-          Get Started
+          Sign in
         </Button>
       </Link>
     </nav>
