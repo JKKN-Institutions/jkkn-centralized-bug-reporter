@@ -64,3 +64,19 @@ export async function checkIsSuperAdminAction() {
     };
   }
 }
+
+export async function listAvailableUsersAction() {
+  try {
+    const data = await SuperAdminServerService.listAvailableUsers();
+    return { data, error: null };
+  } catch (error) {
+    console.error('[listAvailableUsersAction] Error:', error);
+    return {
+      data: null,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to list available users',
+    };
+  }
+}

@@ -37,7 +37,8 @@ import {
   AlertCircle,
   Loader2,
   Users,
-  ExternalLink
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import {
   useOrganizations,
@@ -50,7 +51,7 @@ import { formatDistanceToNow } from 'date-fns';
  * Create and view all organizations
  */
 export default function OrganizationsPage() {
-  const { organizations, loading, refetch } = useOrganizations();
+  const { organizations, loading, refetch } = useOrganizations(true); // Pass true to fetch all orgs with member counts for admin
   const { createOrganization, creating } = useCreateOrganization();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -237,11 +238,25 @@ export default function OrganizationsPage() {
 
         {/* Organizations List */}
         <Card className='border-2 shadow-lg'>
-          <CardHeader>
-            <CardTitle>All Organizations</CardTitle>
-            <CardDescription>
-              Platform-wide list of organizations
-            </CardDescription>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
+            <div>
+              <CardTitle>All Organizations</CardTitle>
+              <CardDescription>
+                Platform-wide list of organizations
+              </CardDescription>
+            </div>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => refetch()}
+              disabled={loading}
+              className='gap-2'
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              />
+              Refresh
+            </Button>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -288,7 +303,7 @@ export default function OrganizationsPage() {
                       <TableCell>
                         <div className='flex items-center gap-2 text-sm text-gray-600'>
                           <Users className='h-4 w-4' />
-                          <span>-</span>
+                          <span>{org.member_count ?? 0}</span>
                         </div>
                       </TableCell>
                       <TableCell className='text-right'>

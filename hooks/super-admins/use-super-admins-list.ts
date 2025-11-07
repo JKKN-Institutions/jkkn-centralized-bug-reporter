@@ -5,6 +5,7 @@ import {
   listSuperAdminsAction,
   addSuperAdminAction,
   removeSuperAdminAction,
+  listAvailableUsersAction,
 } from '@/lib/actions/super-admins';
 import type { CreateSuperAdminPayload } from '@/lib/services/super-admins/server';
 
@@ -42,8 +43,9 @@ export function useAddSuperAdmin() {
       return result.data;
     },
     onSuccess: () => {
-      // Invalidate super admins list to refetch
+      // Invalidate both lists to refetch
       queryClient.invalidateQueries({ queryKey: ['super-admins'] });
+      queryClient.invalidateQueries({ queryKey: ['available-users'] });
     },
   });
 }
@@ -65,6 +67,25 @@ export function useRemoveSuperAdmin() {
     onSuccess: () => {
       // Invalidate super admins list to refetch
       queryClient.invalidateQueries({ queryKey: ['super-admins'] });
+      queryClient.invalidateQueries({ queryKey: ['available-users'] });
     },
+  });
+}
+
+/**
+ * Hook to fetch available users (non-super-admins)
+ */
+export function useAvailableUsers() {
+  return useQuery({
+    queryKey: ['available-users'],
+    queryFn: async () => {
+      const result = await listAvailableUsersAction();
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return result.data ?? [];
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 }

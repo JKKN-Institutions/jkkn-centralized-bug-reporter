@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__supabase__execute_sql",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "mcp__supabase__apply_migration"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "supabase",
+    "sequential-thinking",
+    "memory",
+    "actor-critic-thinking",
+    "chrome-devtools"
+  ]
+}

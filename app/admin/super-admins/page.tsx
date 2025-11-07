@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -37,13 +38,22 @@ import {
   Trash2,
   ArrowLeft,
   AlertCircle,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import {
   useSuperAdminsList,
   useAddSuperAdmin,
-  useRemoveSuperAdmin
+  useRemoveSuperAdmin,
+  useAvailableUsers
 } from '@/hooks/super-admins/use-super-admins-list';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { formatDistanceToNow } from 'date-fns';
 
 /**
@@ -51,32 +61,42 @@ import { formatDistanceToNow } from 'date-fns';
  * Add/remove super admin privileges
  */
 export default function SuperAdminsPage() {
+  const queryClient = useQueryClient();
   const { data: superAdmins, isLoading } = useSuperAdminsList();
+  const { data: availableUsers, isLoading: isLoadingUsers } =
+    useAvailableUsers();
   const addSuperAdmin = useAddSuperAdmin();
   const removeSuperAdmin = useRemoveSuperAdmin();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [email, setEmail] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const handleAddSuperAdmin = async () => {
     setError(null);
 
-    if (!email.trim()) {
-      setError('Email is required');
+    if (!selectedUserId) {
+      setError('Please select a user');
+      return;
+    }
+
+    // Find the selected user's email
+    const selectedUser = availableUsers?.find((u) => u.id === selectedUserId);
+    if (!selectedUser) {
+      setError('Selected user not found');
       return;
     }
 
     try {
       await addSuperAdmin.mutateAsync({
-        email: email.trim(),
+        email: selectedUser.email,
         notes: notes.trim() || undefined
       });
 
       // Success - close dialog and reset form
       setIsAddDialogOpen(false);
-      setEmail('');
+      setSelectedUserId('');
       setNotes('');
     } catch (err) {
       setError(
@@ -116,7 +136,7 @@ export default function SuperAdminsPage() {
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-3'>
               <div className='p-3 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl shadow-lg'>
-                <Shield className='h-6 w-6' />
+                <Shield className='h-6 w-6 text-white' />
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900'>
@@ -140,8 +160,7 @@ export default function SuperAdminsPage() {
                 <DialogHeader>
                   <DialogTitle>Grant Super Admin Privileges</DialogTitle>
                   <DialogDescription>
-                    Grant super admin privileges to a user by their email
-                    address
+                    Select a user to grant super admin privileges
                   </DialogDescription>
                 </DialogHeader>
 
@@ -154,17 +173,64 @@ export default function SuperAdminsPage() {
                   )}
 
                   <div className='space-y-2'>
-                    <Label htmlFor='email'>User Email *</Label>
-                    <Input
-                      id='email'
-                      type='email'
-                      placeholder='user@example.com'
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <p className='text-xs text-gray-500'>
-                      User must already have an account
-                    </p>
+                    <div className='flex items-center justify-between'>
+                      <Label htmlFor='user-select'>Select User *</Label>
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ['available-users']
+                          });
+                        }}
+                        disabled={isLoadingUsers}
+                        className='h-7 gap-1.5 text-xs'
+                      >
+                        <RefreshCw
+                          className={`h-3 w-3 ${isLoadingUsers ? 'animate-spin' : ''}`}
+                        />
+                        Refresh
+                      </Button>
+                    </div>
+                    {isLoadingUsers ? (
+                      <div className='flex items-center justify-center py-8'>
+                        <Loader2 className='h-5 w-5 animate-spin text-gray-400' />
+                        <span className='ml-2 text-sm text-gray-500'>
+                          Loading users...
+                        </span>
+                      </div>
+                    ) : !availableUsers || availableUsers.length === 0 ? (
+                      <Alert>
+                        <AlertCircle className='h-4 w-4' />
+                        <AlertDescription>
+                          No available users found. All users are already super
+                          admins.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <>
+                        <Select
+                          value={selectedUserId}
+                          onValueChange={setSelectedUserId}
+                        >
+                          <SelectTrigger id='user-select' className='w-full'>
+                            <SelectValue placeholder='Select a user to grant privileges' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableUsers.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.full_name || user.email || 'No name'} (
+                                {user.email})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className='text-xs text-gray-500'>
+                          {availableUsers.length} user(s) available
+                        </p>
+                      </>
+                    )}
                   </div>
 
                   <div className='space-y-2'>
@@ -184,7 +250,7 @@ export default function SuperAdminsPage() {
                     variant='outline'
                     onClick={() => {
                       setIsAddDialogOpen(false);
-                      setEmail('');
+                      setSelectedUserId('');
                       setNotes('');
                       setError(null);
                     }}
@@ -193,7 +259,11 @@ export default function SuperAdminsPage() {
                   </Button>
                   <Button
                     onClick={handleAddSuperAdmin}
-                    disabled={addSuperAdmin.isPending}
+                    disabled={
+                      addSuperAdmin.isPending ||
+                      !selectedUserId ||
+                      isLoadingUsers
+                    }
                     className='bg-gradient-to-r from-purple-600 to-purple-800'
                   >
                     {addSuperAdmin.isPending ? (
@@ -223,11 +293,27 @@ export default function SuperAdminsPage() {
 
         {/* Super Admins List */}
         <Card className='border-2 shadow-lg'>
-          <CardHeader>
-            <CardTitle>Current Super Admins</CardTitle>
-            <CardDescription>
-              Users with platform-wide administrative privileges
-            </CardDescription>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
+            <div>
+              <CardTitle>Current Super Admins</CardTitle>
+              <CardDescription>
+                Users with platform-wide administrative privileges
+              </CardDescription>
+            </div>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ['super-admins'] });
+              }}
+              disabled={isLoading}
+              className='gap-2'
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
+              Refresh
+            </Button>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -256,14 +342,23 @@ export default function SuperAdminsPage() {
                       <TableCell>
                         <div className='space-y-1'>
                           <div className='font-medium'>
-                            {admin.user?.user_metadata?.full_name || 'Unknown'}
+                            {admin.user?.user_metadata?.full_name ||
+                              admin.user?.email ||
+                              'Unknown'}
                           </div>
                           <div className='text-sm text-gray-500'>
                             {admin.user?.email || admin.user_id}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{admin.granted_by || 'System'}</TableCell>
+                      <TableCell>
+                        {admin.granted_by_user
+                          ? admin.granted_by_user.user_metadata?.full_name ||
+                            admin.granted_by_user.email
+                          : admin.granted_by
+                            ? 'Unknown User'
+                            : 'System'}
+                      </TableCell>
                       <TableCell>
                         <div className='text-sm'>
                           {formatDistanceToNow(new Date(admin.granted_at), {

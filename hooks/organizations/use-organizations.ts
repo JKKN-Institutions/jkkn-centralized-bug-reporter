@@ -6,8 +6,8 @@ import { OrganizationClientService } from '@/lib/services/organizations/client';
 import type { Organization, CreateOrganizationPayload, UpdateOrganizationPayload } from '@bug-reporter/shared';
 import toast from 'react-hot-toast';
 
-export function useOrganizations() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+export function useOrganizations(includeAllForAdmin = false) {
+  const [organizations, setOrganizations] = useState<(Organization & { member_count?: number })[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +16,10 @@ export function useOrganizations() {
       setLoading(true);
       setError(null);
 
-      const data = await OrganizationClientService.getUserOrganizations();
+      const data = includeAllForAdmin
+        ? await OrganizationClientService.getAllOrganizationsWithMemberCounts()
+        : await OrganizationClientService.getUserOrganizations();
+
       setOrganizations(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch organizations';
@@ -25,7 +28,7 @@ export function useOrganizations() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [includeAllForAdmin]);
 
   useEffect(() => {
     fetchOrganizations();

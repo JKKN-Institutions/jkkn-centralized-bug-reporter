@@ -297,4 +297,36 @@ export class OrganizationClientService {
       throw error;
     }
   }
+
+  /**
+   * Get all organizations with member counts (Super Admin only)
+   */
+  static async getAllOrganizationsWithMemberCounts(): Promise<(Organization & { member_count: number })[]> {
+    try {
+      const supabase = createClient();
+
+      // Fetch all organizations with member counts
+      const { data, error } = await supabase
+        .from('organizations')
+        .select(`
+          *,
+          member_count:organization_members(count)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Map the data to include member_count as a number
+      const organizations = (data || []).map((org: any) => ({
+        ...org,
+        member_count: org.member_count?.[0]?.count || 0,
+      }));
+
+      console.log('[organizations] Fetched all organizations with member counts:', organizations.length);
+      return organizations;
+    } catch (error) {
+      console.error('[organizations] Error fetching all organizations:', error);
+      throw error;
+    }
+  }
 }
