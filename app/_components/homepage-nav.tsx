@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, LogOut } from 'lucide-react';
+import { LayoutDashboard, LogOut, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { OrganizationClientService } from '@/lib/services/organizations/client';
@@ -49,6 +49,12 @@ export function HomepageNav() {
   if (loading) {
     return (
       <nav className='flex items-center gap-3'>
+        <Link href='/docs'>
+          <Button variant='ghost' size='sm' className='cursor-pointer'>
+            <FileText className='h-4 w-4 mr-2' />
+            Docs
+          </Button>
+        </Link>
         <div className='h-9 w-20 bg-gray-200 animate-pulse rounded'></div>
         <div className='h-9 w-24 bg-gray-200 animate-pulse rounded'></div>
       </nav>
@@ -58,6 +64,12 @@ export function HomepageNav() {
   if (user && userOrg) {
     return (
       <nav className='flex items-center gap-3'>
+        <Link href='/docs'>
+          <Button variant='ghost' size='sm' className='cursor-pointer'>
+            <FileText className='h-4 w-4 mr-2' />
+            Docs
+          </Button>
+        </Link>
         <Link href={`/org/${userOrg.slug}`}>
           <Button
             size='sm'
@@ -82,6 +94,12 @@ export function HomepageNav() {
 
   return (
     <nav className='flex items-center gap-3'>
+      <Link href='/docs'>
+        <Button variant='ghost' size='sm' className='cursor-pointer'>
+          <FileText className='h-4 w-4 mr-2' />
+          Docs
+        </Button>
+      </Link>
       <Link href='/login'>
         <Button
           variant='ghost'

@@ -195,7 +195,7 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
                             ✅ Published on npm Registry
                           </h5>
                           <p className='text-sm text-green-800 mb-2'>
-                            The SDK is now available on npm as <code className='bg-green-100 px-1 rounded'>@boobalan_jkkn/bug-reporter-sdk@1.0.0</code>. Simply install it using npm or yarn - no additional setup required!
+                            The SDK is now available on npm as <code className='bg-green-100 px-1 rounded'>@boobalan_jkkn/bug-reporter-sdk@1.1.0</code>. Simply install it using npm or yarn - no additional setup required!
                           </p>
                           <div className='flex flex-col sm:flex-row gap-2 mt-3'>
                             <a
@@ -219,10 +219,11 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
                           <div className='mt-3 pt-3 border-t border-green-200'>
                             <p className='text-xs text-green-700 font-medium mb-1'>📦 Package Details:</p>
                             <ul className='text-xs text-green-800 space-y-0.5'>
-                              <li>• Version: 1.0.0</li>
-                              <li>• Size: 8.7 KB (52.8 KB unpacked)</li>
+                              <li>• Version: 1.1.0 (Latest)</li>
+                              <li>• Size: 18.6 KB (86.4 KB unpacked)</li>
                               <li>• Includes: CJS, ESM, TypeScript definitions</li>
                               <li>• Dependencies: 3 (including @boobalan_jkkn/shared)</li>
+                              <li>✨ NEW: Mandatory screenshots + Auto console logs</li>
                             </ul>
                           </div>
                         </div>
@@ -339,7 +340,7 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
                             After creating the application, you'll receive an API key. Copy and save it securely.
                           </p>
                           <div className='bg-slate-950 text-slate-50 rounded-lg p-4 font-mono text-xs'>
-                            <pre>br_xxxxxxxxxxxxxxxxxxxxxxxxxx</pre>
+                            <pre>app_xxxxxxxxxxxxxxxxxxxxxxxxxx</pre>
                           </div>
                         </div>
                       </div>
@@ -383,8 +384,8 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
                       </p>
                       <div className='bg-slate-950 text-slate-50 rounded-lg p-4 font-mono text-sm overflow-x-auto'>
                         <pre>{`# JKKN Bug Reporter Configuration
-NEXT_PUBLIC_BUG_REPORTER_API_KEY=br_your_api_key_here
-NEXT_PUBLIC_BUG_REPORTER_API_URL=https://your-domain.com/api/v1/public`}</pre>
+NEXT_PUBLIC_BUG_REPORTER_API_KEY=app_your_api_key_here
+NEXT_PUBLIC_BUG_REPORTER_API_URL=https://your-platform.vercel.app`}</pre>
                       </div>
                     </div>
 
@@ -485,11 +486,11 @@ export function BugReporterWrapper({
                         </li>
                         <li className='flex items-center gap-2'>
                           <CheckCircle2 className='h-4 w-4' />
-                          📸 Automatic screenshot capture
+                          📸 <strong>MANDATORY</strong> screenshot capture (v1.1.0+)
                         </li>
                         <li className='flex items-center gap-2'>
                           <CheckCircle2 className='h-4 w-4' />
-                          📝 Console logs auto-capture
+                          🔍 <strong>AUTOMATIC</strong> console logs capture (v1.1.0+)
                         </li>
                         <li className='flex items-center gap-2'>
                           <CheckCircle2 className='h-4 w-4' />
@@ -645,7 +646,7 @@ function MyComponent() {
                       <div className='border-l-4 border-red-500 bg-red-50 p-4 rounded'>
                         <h5 className='font-semibold mb-1'>API key validation failed?</h5>
                         <p className='text-sm text-muted-foreground'>
-                          • Verify API key starts with "br_"<br />
+                          • Verify API key starts with "app_"<br />
                           • Check that application is active<br />
                           • Ensure API URL matches platform URL<br />
                           • Try regenerating the API key
@@ -653,11 +654,38 @@ function MyComponent() {
                       </div>
 
                       <div className='border-l-4 border-blue-500 bg-blue-50 p-4 rounded'>
-                        <h5 className='font-semibold mb-1'>Screenshots not capturing?</h5>
+                        <h5 className='font-semibold mb-1'>Screenshots not capturing? (v1.1.0+)</h5>
                         <p className='text-sm text-muted-foreground'>
+                          • Screenshot is now MANDATORY - widget won't open without it<br />
                           • Browser may block html2canvas library<br />
                           • Check Content Security Policy (CSP)<br />
-                          • Verify no conflicting screenshot libraries
+                          • Verify no conflicting screenshot libraries<br />
+                          • Try closing overlays/modals and retry
+                        </p>
+                      </div>
+
+                      <div className='border-l-4 border-green-500 bg-green-50 p-4 rounded'>
+                        <h5 className='font-semibold mb-1'>Console logs empty? (v1.1.0+)</h5>
+                        <p className='text-sm text-muted-foreground'>
+                          • Logs capture automatically in v1.1.0+<br />
+                          • Perform actions that generate console output before reporting<br />
+                          • Verify you're using v1.1.0 or later: <code className='bg-green-100 px-1 rounded text-xs'>npm list @boobalan_jkkn/bug-reporter-sdk</code><br />
+                          • Check BugReporterProvider wraps your app correctly
+                        </p>
+                      </div>
+
+                      <div className='border-l-4 border-orange-500 bg-orange-50 p-4 rounded'>
+                        <h5 className='font-semibold mb-1'>How to update to v1.1.0?</h5>
+                        <p className='text-sm text-muted-foreground mb-2'>
+                          If you already have the SDK installed, update to the latest version:
+                        </p>
+                        <div className='bg-slate-950 text-slate-50 rounded p-2 font-mono text-xs mb-2'>
+                          npm install @boobalan_jkkn/bug-reporter-sdk@latest
+                        </div>
+                        <p className='text-sm text-muted-foreground'>
+                          ✅ No breaking changes - fully backward compatible!<br />
+                          ✅ New features work automatically<br />
+                          ✅ No configuration changes needed
                         </p>
                       </div>
                     </div>

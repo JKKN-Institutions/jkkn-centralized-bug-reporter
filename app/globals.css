@@ -116,8 +116,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    height: auto;
+    overflow-y: auto;
+  }
   body {
     @apply bg-background text-foreground;
+    height: auto;
+    overflow-y: auto;
   }
 }
 

@@ -131,6 +131,18 @@ export class BugReportClientService {
     try {
       const supabase = createClient();
 
+      // Check authentication first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error('[BugReportClientService] Auth error:', authError);
+        throw new Error('Authentication failed. Please log in again.');
+      }
+
+      if (!user) {
+        throw new Error('You must be logged in to update bug status.');
+      }
+
       const updateData: { status: string; resolved_at: string | null } = {
         status,
         resolved_at: null,
@@ -148,13 +160,34 @@ export class BugReportClientService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[BugReportClientService] Supabase error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+
+        // Provide user-friendly error messages
+        if (error.code === 'PGRST116') {
+          throw new Error('Bug not found or you do not have permission to update it.');
+        } else if (error.code === '42501') {
+          throw new Error('Permission denied. You must be a member of this organization.');
+        } else {
+          throw new Error(error.message || 'Failed to update bug status.');
+        }
+      }
 
       console.log(`[BugReportClientService] Updated status for ${id}: ${status}`);
       return data;
     } catch (error) {
       console.error('[BugReportClientService] Error updating bug status:', error);
-      throw error;
+
+      // Re-throw with better error message
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while updating bug status.');
     }
   }
 
