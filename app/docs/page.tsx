@@ -15,6 +15,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { HomepageNav } from '../_components/homepage-nav';
+import { DocActions, FullDocDownloadCard } from './_components/doc-actions';
 
 export default function DocumentationPage() {
   return (
@@ -116,6 +117,9 @@ export default function DocumentationPage() {
               </CardContent>
             </Card>
 
+            {/* Full Documentation Download */}
+            <FullDocDownloadCard />
+
             {/* Detailed Steps */}
             <Tabs defaultValue="installation" className='space-y-8'>
               <TabsList className='grid w-full grid-cols-4 lg:w-auto'>
@@ -129,13 +133,18 @@ export default function DocumentationPage() {
               <TabsContent value="installation" className='space-y-6'>
                 <Card>
                   <CardHeader>
-                    <CardTitle className='flex items-center gap-2'>
-                      <Package className='h-5 w-5' />
-                      Step 1: Installation
-                    </CardTitle>
-                    <CardDescription>
-                      Install the Bug Reporter SDK package in your Next.js project
-                    </CardDescription>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <Package className='h-5 w-5' />
+                          Step 1: Installation
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Install the Bug Reporter SDK package in your Next.js project
+                        </CardDescription>
+                      </div>
+                      <DocActions tabId="installation" />
+                    </div>
                   </CardHeader>
                   <CardContent className='space-y-4'>
                     <div>
@@ -274,13 +283,18 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
               <TabsContent value="configuration" className='space-y-6'>
                 <Card>
                   <CardHeader>
-                    <CardTitle className='flex items-center gap-2'>
-                      <Settings className='h-5 w-5' />
-                      Step 2: Get Your API Key
-                    </CardTitle>
-                    <CardDescription>
-                      Generate API credentials from the JKKN Bug Reporter platform
-                    </CardDescription>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <Settings className='h-5 w-5' />
+                          Step 2: Get Your API Key
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Generate API credentials from the JKKN Bug Reporter platform
+                        </CardDescription>
+                      </div>
+                      <DocActions tabId="configuration" />
+                    </div>
                   </CardHeader>
                   <CardContent className='space-y-6'>
                     <div className='space-y-4'>
@@ -367,13 +381,18 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
               <TabsContent value="nextjs" className='space-y-6'>
                 <Card>
                   <CardHeader>
-                    <CardTitle className='flex items-center gap-2'>
-                      <Code className='h-5 w-5' />
-                      Step 3: Next.js Integration
-                    </CardTitle>
-                    <CardDescription>
-                      Complete setup for Next.js 15 with App Router
-                    </CardDescription>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <Code className='h-5 w-5' />
+                          Step 3: Next.js Integration
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Complete setup for Next.js 15 with App Router
+                        </CardDescription>
+                      </div>
+                      <DocActions tabId="nextjs" />
+                    </div>
                   </CardHeader>
                   <CardContent className='space-y-6'>
                     {/* Environment Variables */}
@@ -510,10 +529,15 @@ export function BugReporterWrapper({
               <TabsContent value="advanced" className='space-y-6'>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Advanced Configuration</CardTitle>
-                    <CardDescription>
-                      Customize behavior and add advanced features
-                    </CardDescription>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle>Advanced Configuration</CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Customize behavior and add advanced features
+                        </CardDescription>
+                      </div>
+                      <DocActions tabId="advanced" />
+                    </div>
                   </CardHeader>
                   <CardContent className='space-y-6'>
                     {/* Custom Styling */}
