@@ -12,6 +12,8 @@
     "sequential-thinking",
     "memory",
     "actor-critic-thinking",
-    "chrome-devtools"
-  ]
+    "chrome-devtools",
+    "next-devtools"
+  ],
+  "enableAllProjectMcpServers": true
 }
