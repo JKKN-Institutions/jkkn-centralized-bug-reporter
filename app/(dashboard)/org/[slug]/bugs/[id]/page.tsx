@@ -14,6 +14,7 @@ import { BugReportClientService } from '@/lib/services/bug-reports/client';
 import { ConsoleLogsSection } from './_components/console-logs-section';
 import { NetworkTraceSection } from './_components/network-trace-section';
 import { SimilarBugsCard } from './_components/similar-bugs-card';
+import { AttachmentsSection } from './_components/attachments-section';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -194,6 +195,11 @@ export default function BugDetailPage() {
             />
           </CardContent>
         </Card>
+      )}
+
+      {/* File Attachments */}
+      {bug.attachments && bug.attachments.length > 0 && (
+        <AttachmentsSection attachments={bug.attachments} />
       )}
 
       {bug.console_logs && bug.console_logs.length > 0 && (

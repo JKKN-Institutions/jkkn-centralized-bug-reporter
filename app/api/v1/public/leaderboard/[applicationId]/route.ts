@@ -105,9 +105,10 @@ export const GET = withApiKeyAuth(
       }
 
       // Build query for bug reports
+      // Include metadata for reporter info (SDK stores reporter_email/name in metadata)
       let query = supabase
         .from('bug_reports')
-        .select('reporter_id, priority, created_at')
+        .select('reporter_user_id, category, created_at, metadata')
         .eq('application_id', applicationId)
         .eq('status', 'resolved'); // Only count resolved bugs
 
@@ -128,42 +129,62 @@ export const GET = withApiKeyAuth(
       }
 
       // Calculate points per reporter
+      // Use email as the unique identifier (from metadata or reporter_user_id lookup)
       const reporterPoints = new Map<string, number>();
       const reporterBugCounts = new Map<string, number>();
+      const reporterNames = new Map<string, string>();
 
       for (const bug of bugReports || []) {
-        if (!bug.reporter_id) continue;
+        // Get reporter identifier - prefer metadata.reporter_email, fallback to reporter_user_id
+        const metadata = bug.metadata as { reporter_email?: string; reporter_name?: string } | null;
+        const reporterEmail = metadata?.reporter_email;
+        const reporterName = metadata?.reporter_name;
 
-        const currentPoints = reporterPoints.get(bug.reporter_id) || 0;
-        const currentCount = reporterBugCounts.get(bug.reporter_id) || 0;
+        // Skip if no reporter identifier
+        if (!reporterEmail && !bug.reporter_user_id) continue;
 
-        // Calculate points based on priority
-        let points = 0;
-        switch (bug.priority) {
-          case 'low':
-            points = config.points_low;
-            break;
-          case 'medium':
-            points = config.points_medium;
-            break;
-          case 'high':
-            points = config.points_high;
-            break;
-          case 'critical':
-            points = config.points_critical;
-            break;
-          default:
-            points = config.points_low; // Default to low
+        // Use email as key, or fallback to user_id
+        const reporterKey = reporterEmail || bug.reporter_user_id;
+        if (!reporterKey) continue;
+
+        const currentPoints = reporterPoints.get(reporterKey) || 0;
+        const currentCount = reporterBugCounts.get(reporterKey) || 0;
+
+        // Store reporter name for display
+        if (reporterName && !reporterNames.has(reporterKey)) {
+          reporterNames.set(reporterKey, reporterName);
         }
 
-        reporterPoints.set(bug.reporter_id, currentPoints + points);
-        reporterBugCounts.set(bug.reporter_id, currentCount + 1);
+        // Calculate points based on category
+        // Security bugs get critical points, performance gets high, others get medium
+        let points = config.points_medium; // Default points per bug
+        switch (bug.category) {
+          case 'security':
+            points = config.points_critical;
+            break;
+          case 'performance':
+            points = config.points_high;
+            break;
+          case 'bug':
+          case 'ui_design':
+            points = config.points_medium;
+            break;
+          case 'feature_request':
+          case 'other':
+            points = config.points_low;
+            break;
+          default:
+            points = config.points_medium;
+        }
+
+        reporterPoints.set(reporterKey, currentPoints + points);
+        reporterBugCounts.set(reporterKey, currentCount + 1);
       }
 
-      // Get reporter profiles
-      const reporterIds = Array.from(reporterPoints.keys());
+      // Get reporter keys
+      const reporterKeys = Array.from(reporterPoints.keys());
 
-      if (reporterIds.length === 0) {
+      if (reporterKeys.length === 0) {
         return createApiSuccessResponse({
           enabled: true,
           leaderboard: [],
@@ -180,29 +201,16 @@ export const GET = withApiKeyAuth(
         });
       }
 
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, avatar_url')
-        .in('id', reporterIds);
-
-      if (profilesError) {
-        console.error('[LeaderboardAPI] Profiles error:', profilesError);
-        return createApiErrorResponse(
-          'INTERNAL_ERROR',
-          'Failed to fetch user profiles',
-          500
-        );
-      }
-
-      // Build leaderboard with profile data
-      const leaderboard = (profiles || [])
-        .map((profile) => ({
-          user_id: profile.id,
-          email: profile.email,
-          full_name: profile.full_name || profile.email || 'Anonymous',
-          avatar_url: profile.avatar_url,
-          total_points: reporterPoints.get(profile.id) || 0,
-          total_bugs: reporterBugCounts.get(profile.id) || 0
+      // Build leaderboard directly from collected data
+      // (No need to fetch profiles since reporter info comes from metadata)
+      const leaderboard = reporterKeys
+        .map((key) => ({
+          user_id: key, // Use email as identifier
+          email: key.includes('@') ? key : null, // Only set email if it looks like an email
+          full_name: reporterNames.get(key) || key.split('@')[0] || 'Anonymous',
+          avatar_url: null,
+          total_points: reporterPoints.get(key) || 0,
+          total_bugs: reporterBugCounts.get(key) || 0
         }))
         .sort((a, b) => b.total_points - a.total_points) // Sort by points descending
         .slice(0, limit); // Limit results
