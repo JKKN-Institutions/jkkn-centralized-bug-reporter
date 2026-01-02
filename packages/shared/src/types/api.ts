@@ -5,6 +5,25 @@ import { BugReport, BugReportCategory, CreateBugReportPayload } from './bug-repo
 import { EnhancedBugReportMessage } from './messaging';
 
 // =============================================
+// NETWORK TRACE TYPES (SDK Capture)
+// =============================================
+
+export interface NetworkRequest {
+  id?: string;
+  method: string;
+  url: string;
+  status: number;
+  statusText: string;
+  duration_ms: number;
+  request_headers: Record<string, string>;
+  response_headers: Record<string, string>;
+  timestamp: string;
+  error?: string;
+  request_body_size?: number;
+  response_body_size?: number;
+}
+
+// =============================================
 // API RESPONSE WRAPPER
 // =============================================
 
@@ -94,6 +113,9 @@ export interface SubmitBugReportRequest {
     message: string;
     timestamp: string;
   }>;
+
+  // Network trace (captured by SDK)
+  network_trace?: NetworkRequest[];
 
   // Reporter information (optional)
   reporter_name?: string;

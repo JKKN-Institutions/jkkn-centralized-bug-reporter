@@ -1,3 +1,5 @@
+import type { NetworkRequest } from './api';
+
 // Bug Report Status Types
 export type BugReportStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 
@@ -40,7 +42,20 @@ export interface BugReport {
   // Points for gamification
   points: number;
 
-  // Metadata
+  // SDK Metadata (stored in JSONB)
+  metadata?: {
+    title?: string;
+    reporter_name?: string | null;
+    reporter_email?: string | null;
+    browser_info?: string | null;
+    system_info?: string | null;
+    viewport?: { width: number; height: number } | null;
+    screen_resolution?: { width: number; height: number } | null;
+    timestamp?: string;
+    network_trace?: NetworkRequest[] | null;
+  } | null;
+
+  // Status tracking
   is_resolved: boolean;
   resolved_at?: string | null;
   created_at: string;

@@ -18,3 +18,6 @@ export * from './messaging';
 
 // Public API
 export * from './api';
+
+// AI Similarity Detection
+export * from './similarity';

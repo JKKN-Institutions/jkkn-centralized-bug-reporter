@@ -12,6 +12,8 @@ import { useOrganizationContext } from '@/hooks/organizations/use-organization-c
 import { BugStatusBadge } from '../_components/bug-status-badge';
 import { BugReportClientService } from '@/lib/services/bug-reports/client';
 import { ConsoleLogsSection } from './_components/console-logs-section';
+import { NetworkTraceSection } from './_components/network-trace-section';
+import { SimilarBugsCard } from './_components/similar-bugs-card';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -197,6 +199,14 @@ export default function BugDetailPage() {
       {bug.console_logs && bug.console_logs.length > 0 && (
         <ConsoleLogsSection logs={bug.console_logs} />
       )}
+
+      {/* Network Trace from SDK v1.2.0+ */}
+      {bug.metadata?.network_trace && bug.metadata.network_trace.length > 0 && (
+        <NetworkTraceSection networkTrace={bug.metadata.network_trace} />
+      )}
+
+      {/* AI-Powered Similar Bugs Detection */}
+      <SimilarBugsCard bugId={id} organizationSlug={organization.slug} />
 
       {bug.messages && bug.messages.length > 0 && (
         <Card>

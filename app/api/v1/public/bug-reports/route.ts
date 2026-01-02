@@ -104,6 +104,8 @@ export const POST = withApiKeyAuth(async (request: NextRequest, context: ApiRequ
         viewport: body.metadata?.viewport || null,
         screen_resolution: body.metadata?.screenResolution || null,
         timestamp: body.metadata?.timestamp || new Date().toISOString(),
+        // Network trace captured by SDK v1.2.0+
+        network_trace: body.network_trace || null,
       },
     };
 

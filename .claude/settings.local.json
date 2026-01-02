@@ -4,9 +4,14 @@
       "mcp__supabase__execute_sql",
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
-      "mcp__supabase__apply_migration"
+      "mcp__supabase__apply_migration",
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "mcp__next-devtools__init",
+      "WebSearch"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase",
     "sequential-thinking",
@@ -14,6 +19,5 @@
     "actor-critic-thinking",
     "chrome-devtools",
     "next-devtools"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
