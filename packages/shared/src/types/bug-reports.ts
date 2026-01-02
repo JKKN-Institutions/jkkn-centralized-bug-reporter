@@ -1,4 +1,4 @@
-import type { NetworkRequest } from './api';
+import type { NetworkRequest, Attachment } from './api';
 
 // Bug Report Status Types
 export type BugReportStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -35,6 +35,9 @@ export interface BugReport {
   screenshot_url?: string | null;
   page_url: string;
   console_logs?: any;
+
+  // File attachments (stored in JSONB)
+  attachments?: Attachment[] | null;
 
   // Assignment
   assigned_to?: string | null;

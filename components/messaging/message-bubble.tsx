@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageReactions } from './message-reactions';
-import type { EnhancedBugReportMessage } from '@bug-reporter/shared';
+import type { EnhancedBugReportMessage } from '@boobalan_jkkn/shared';
 import { formatDistanceToNow } from 'date-fns';
 import { FileIcon, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';

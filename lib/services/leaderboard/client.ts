@@ -6,7 +6,7 @@ import type {
   LeaderboardConfig,
   UpdateLeaderboardConfigPayload,
   LeaderboardTimePeriod,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 interface BugMetadata {
   points?: number;

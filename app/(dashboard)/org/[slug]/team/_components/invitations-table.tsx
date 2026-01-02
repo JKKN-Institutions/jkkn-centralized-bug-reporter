@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { RoleBadge } from './role-badge';
 import { Mail, MailCheck, Trash2 } from 'lucide-react';
-import type { OrganizationInvitation } from '@bug-reporter/shared';
+import type { OrganizationInvitation } from '@boobalan_jkkn/shared';
 
 interface InvitationsTableProps {
   invitations: OrganizationInvitation[];

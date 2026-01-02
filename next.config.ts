@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@bug-reporter/shared"],
+  transpilePackages: ["@boobalan_jkkn/shared"],
 
   // Add CORS headers for API routes
   async headers() {

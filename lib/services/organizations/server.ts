@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import type { Organization } from '@bug-reporter/shared';
+import type { Organization } from '@boobalan_jkkn/shared';
 
 export class OrganizationServerService {
   /**

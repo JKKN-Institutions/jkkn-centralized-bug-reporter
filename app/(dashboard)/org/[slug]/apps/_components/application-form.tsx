@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { AllowedDomainsInput } from './allowed-domains-input';
-import type { Application } from '@bug-reporter/shared';
+import type { Application } from '@boobalan_jkkn/shared';
 
 const applicationFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),

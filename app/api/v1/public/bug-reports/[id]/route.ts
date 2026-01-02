@@ -12,7 +12,7 @@ import type {
   EnhancedBugReportMessage,
   MessageAttachment,
   MessageReaction,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 interface MessageQueryResult {
   id: string;

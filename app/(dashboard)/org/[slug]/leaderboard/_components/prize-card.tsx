@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, Gift } from 'lucide-react';
-import type { LeaderboardConfig } from '@bug-reporter/shared';
+import type { LeaderboardConfig } from '@boobalan_jkkn/shared';
 
 interface PrizeCardProps {
   config: LeaderboardConfig | null;

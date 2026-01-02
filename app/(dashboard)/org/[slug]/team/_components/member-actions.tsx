@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, UserCog, Trash2, Shield, Code } from 'lucide-react';
-import type { OrganizationMember } from '@bug-reporter/shared';
+import type { OrganizationMember } from '@boobalan_jkkn/shared';
 
 interface MemberActionsProps {
   member: OrganizationMember;

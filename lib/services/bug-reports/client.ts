@@ -7,7 +7,7 @@ import type {
   BugReportFilters,
   UpdateBugReportPayload,
   BugReportStats,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 interface BugReportQueryResult extends Omit<BugReport, 'title' | 'reporter_name' | 'reporter_email'> {
   metadata?: {

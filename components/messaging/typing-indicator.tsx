@@ -1,6 +1,6 @@
 'use client';
 
-import type { TypingIndicator as TypingIndicatorType } from '@bug-reporter/shared';
+import type { TypingIndicator as TypingIndicatorType } from '@boobalan_jkkn/shared';
 
 interface TypingIndicatorProps {
   typingUsers: TypingIndicatorType[];

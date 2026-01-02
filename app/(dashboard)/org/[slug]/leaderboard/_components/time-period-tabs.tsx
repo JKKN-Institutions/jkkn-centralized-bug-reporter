@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import type { LeaderboardTimePeriod } from '@bug-reporter/shared';
+import type { LeaderboardTimePeriod } from '@boobalan_jkkn/shared';
 
 interface TimePeriodTabsProps {
   value: LeaderboardTimePeriod;

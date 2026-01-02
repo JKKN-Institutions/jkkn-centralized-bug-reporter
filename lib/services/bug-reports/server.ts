@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import type { BugReport, BugReportStats } from '@bug-reporter/shared';
+import type { BugReport, BugReportStats } from '@boobalan_jkkn/shared';
 
 export class BugReportServerService {
   /**

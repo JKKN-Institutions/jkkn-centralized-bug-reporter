@@ -21,7 +21,7 @@ import {
   CheckCircle2,
   ArrowRight,
 } from 'lucide-react';
-import type { NetworkRequest } from '@bug-reporter/shared';
+import type { NetworkRequest } from '@boobalan_jkkn/shared';
 
 interface NetworkTraceSectionProps {
   networkTrace: NetworkRequest[];

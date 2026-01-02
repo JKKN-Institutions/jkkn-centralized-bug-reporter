@@ -6,7 +6,7 @@ import type {
   MessageAttachment,
   MessageReaction,
   SendMessagePayload,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 interface TypingUser {
   user_id: string;

@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { Organization } from '@bug-reporter/shared';
+import type { Organization } from '@boobalan_jkkn/shared';
 
 const organizationSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),

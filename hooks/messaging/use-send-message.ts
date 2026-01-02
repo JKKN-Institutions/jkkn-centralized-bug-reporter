@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MessagingClientService } from '@/lib/services/messaging/client';
-import type { SendMessagePayload } from '@bug-reporter/shared';
+import type { SendMessagePayload } from '@boobalan_jkkn/shared';
 import toast from 'react-hot-toast';
 
 /**

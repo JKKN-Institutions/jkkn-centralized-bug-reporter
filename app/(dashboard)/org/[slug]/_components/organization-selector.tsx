@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useState } from 'react';
-import type { Organization } from '@bug-reporter/shared';
+import type { Organization } from '@boobalan_jkkn/shared';
 
 interface OrganizationSelectorProps {
   organizations: Organization[];

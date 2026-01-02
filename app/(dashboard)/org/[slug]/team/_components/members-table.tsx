@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { RoleBadge } from './role-badge';
 import { MemberActions } from './member-actions';
-import type { OrganizationMember } from '@bug-reporter/shared';
+import type { OrganizationMember } from '@boobalan_jkkn/shared';
 
 interface MembersTableProps {
   members: OrganizationMember[];

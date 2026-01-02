@@ -12,7 +12,7 @@ import { LeaderboardPodium } from './_components/leaderboard-podium';
 import { LeaderboardTable } from './_components/leaderboard-table';
 import { PrizeCard } from './_components/prize-card';
 import { TimePeriodTabs } from './_components/time-period-tabs';
-import type { LeaderboardTimePeriod } from '@bug-reporter/shared';
+import type { LeaderboardTimePeriod } from '@boobalan_jkkn/shared';
 
 export default function LeaderboardPage() {
   const { organization, userRole, loading: orgLoading } = useOrganizationContext();

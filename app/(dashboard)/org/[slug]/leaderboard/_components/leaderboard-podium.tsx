@@ -2,7 +2,7 @@
 
 import { Trophy, Award, Medal } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import type { LeaderboardEntry } from '@bug-reporter/shared';
+import type { LeaderboardEntry } from '@boobalan_jkkn/shared';
 
 interface LeaderboardPodiumProps {
   topThree: LeaderboardEntry[];

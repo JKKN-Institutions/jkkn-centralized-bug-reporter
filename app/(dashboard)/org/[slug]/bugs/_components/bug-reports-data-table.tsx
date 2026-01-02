@@ -42,7 +42,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { BugStatusBadge } from './bug-status-badge';
-import { BugReport, Application } from '@bug-reporter/shared';
+import { BugReport, Application } from '@boobalan_jkkn/shared';
 
 interface BugReportsDataTableProps {
   data: BugReport[];

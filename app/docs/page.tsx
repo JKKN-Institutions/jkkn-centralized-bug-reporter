@@ -12,7 +12,11 @@ import {
   AlertCircle,
   BookOpen,
   Copy,
-  ExternalLink
+  ExternalLink,
+  FileUp,
+  BarChart3,
+  Trophy,
+  Network
 } from 'lucide-react';
 import { HomepageNav } from '../_components/homepage-nav';
 import { DocActions, FullDocDownloadCard } from './_components/doc-actions';
@@ -52,7 +56,7 @@ export default function DocumentationPage() {
               Integration Guide
             </h1>
             <p className='text-xl text-blue-100 max-w-2xl mx-auto'>
-              Complete guide to integrate JKKN Bug Reporter into your Next.js applications with Supabase
+              Complete Bug Bounty Platform SDK v1.3.0 - File Attachments, Leaderboards, Enhanced Bug Viewing, and More
             </p>
           </div>
         </div>
@@ -122,10 +126,11 @@ export default function DocumentationPage() {
 
             {/* Detailed Steps */}
             <Tabs defaultValue="installation" className='space-y-8'>
-              <TabsList className='grid w-full grid-cols-4 lg:w-auto'>
+              <TabsList className='grid w-full grid-cols-5 lg:w-auto'>
                 <TabsTrigger value="installation">Installation</TabsTrigger>
                 <TabsTrigger value="configuration">Configuration</TabsTrigger>
                 <TabsTrigger value="nextjs">Next.js Setup</TabsTrigger>
+                <TabsTrigger value="features">Features</TabsTrigger>
                 <TabsTrigger value="advanced">Advanced</TabsTrigger>
               </TabsList>
 
@@ -204,7 +209,7 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
                             ✅ Published on npm Registry
                           </h5>
                           <p className='text-sm text-green-800 mb-2'>
-                            The SDK is now available on npm as <code className='bg-green-100 px-1 rounded'>@boobalan_jkkn/bug-reporter-sdk@1.1.0</code>. Simply install it using npm or yarn - no additional setup required!
+                            The SDK is now available on npm as <code className='bg-green-100 px-1 rounded'>@boobalan_jkkn/bug-reporter-sdk@1.3.0</code>. Simply install it using npm or yarn - no additional setup required!
                           </p>
                           <div className='flex flex-col sm:flex-row gap-2 mt-3'>
                             <a
@@ -228,11 +233,11 @@ npm install file:path/to/packages/bug-reporter-sdk`}</pre>
                           <div className='mt-3 pt-3 border-t border-green-200'>
                             <p className='text-xs text-green-700 font-medium mb-1'>📦 Package Details:</p>
                             <ul className='text-xs text-green-800 space-y-0.5'>
-                              <li>• Version: 1.1.0 (Latest)</li>
-                              <li>• Size: 18.6 KB (86.4 KB unpacked)</li>
+                              <li>• Version: 1.3.0 (Latest)</li>
+                              <li>• Size: 41.3 KB (211.5 KB unpacked)</li>
                               <li>• Includes: CJS, ESM, TypeScript definitions</li>
                               <li>• Dependencies: 3 (including @boobalan_jkkn/shared)</li>
-                              <li>✨ NEW: Mandatory screenshots + Auto console logs</li>
+                              <li>✨ NEW in v1.3.0: File Attachments + Leaderboard + Enhanced Bug Viewing</li>
                             </ul>
                           </div>
                         </div>
@@ -496,7 +501,7 @@ export function BugReporterWrapper({
                     <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
                       <h5 className='font-semibold text-blue-900 mb-2 flex items-center gap-2'>
                         <Zap className='h-4 w-4' />
-                        What You Get
+                        What You Get (v1.3.0)
                       </h5>
                       <ul className='space-y-1 text-sm text-blue-800'>
                         <li className='flex items-center gap-2'>
@@ -505,21 +510,424 @@ export function BugReporterWrapper({
                         </li>
                         <li className='flex items-center gap-2'>
                           <CheckCircle2 className='h-4 w-4' />
-                          📸 <strong>MANDATORY</strong> screenshot capture (v1.1.0+)
+                          📸 <strong>MANDATORY</strong> screenshot capture
                         </li>
                         <li className='flex items-center gap-2'>
                           <CheckCircle2 className='h-4 w-4' />
-                          🔍 <strong>AUTOMATIC</strong> console logs capture (v1.1.0+)
+                          📎 <strong>NEW:</strong> File attachments (up to 5 files, 10MB each)
+                        </li>
+                        <li className='flex items-center gap-2'>
+                          <CheckCircle2 className='h-4 w-4' />
+                          🔍 <strong>AUTOMATIC</strong> console logs capture
+                        </li>
+                        <li className='flex items-center gap-2'>
+                          <CheckCircle2 className='h-4 w-4' />
+                          🌐 <strong>NEW:</strong> Network request capture (fetch/XHR)
+                        </li>
+                        <li className='flex items-center gap-2'>
+                          <CheckCircle2 className='h-4 w-4' />
+                          📊 <strong>NEW:</strong> Enhanced bug viewing with stats & filters
+                        </li>
+                        <li className='flex items-center gap-2'>
+                          <CheckCircle2 className='h-4 w-4' />
+                          🏆 <strong>NEW:</strong> Leaderboard system with medals & prizes
                         </li>
                         <li className='flex items-center gap-2'>
                           <CheckCircle2 className='h-4 w-4' />
                           👤 User context tracking
                         </li>
-                        <li className='flex items-center gap-2'>
-                          <CheckCircle2 className='h-4 w-4' />
-                          🌐 Browser and system info
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Features Tab - v1.3.0 */}
+              <TabsContent value="features" className='space-y-6'>
+                {/* File Attachments */}
+                <Card>
+                  <CardHeader>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <FileUp className='h-5 w-5 text-purple-600' />
+                          File Attachments
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Upload files directly with bug reports for better context
+                        </CardDescription>
+                      </div>
+                      <div className='inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold'>
+                        NEW in v1.3.0
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='bg-purple-50 border border-purple-200 rounded-lg p-4'>
+                      <h5 className='font-semibold text-purple-900 mb-2'>Key Features</h5>
+                      <ul className='space-y-1.5 text-sm text-purple-800'>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Up to 5 files</strong> per bug report</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>10MB per file</strong> size limit with validation</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span>Supported types: <strong>Images</strong> (PNG, JPG, GIF, WebP), <strong>PDF</strong>, <strong>TXT</strong>, <strong>CSV</strong>, <strong>JSON</strong></span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Image preview thumbnails</strong> in upload dialog</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Automatic validation</strong> for file size and type</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span>Stored securely in <strong>Supabase Storage</strong> organized by application</span>
                         </li>
                       </ul>
+                    </div>
+
+                    <div>
+                      <h5 className='font-semibold mb-2'>How It Works</h5>
+                      <p className='text-sm text-muted-foreground mb-3'>
+                        File upload is built directly into the bug reporting widget. No additional configuration needed!
+                      </p>
+                      <div className='bg-slate-950 text-slate-50 rounded-lg p-4 font-mono text-xs overflow-x-auto'>
+                        <pre>{`// Files upload automatically available in bug widget
+<BugReporterProvider
+  apiKey={process.env.NEXT_PUBLIC_BUG_REPORTER_API_KEY!}
+  apiUrl={process.env.NEXT_PUBLIC_BUG_REPORTER_API_URL!}
+>
+  {children}
+</BugReporterProvider>
+
+// When users click the bug button:
+// 1. They fill out bug details
+// 2. Click "Choose Files" to add attachments
+// 3. Preview shows selected files
+// 4. Submit - files are uploaded automatically!`}</pre>
+                      </div>
+                    </div>
+
+                    <div className='bg-amber-50 border border-amber-200 rounded-lg p-4'>
+                      <div className='flex items-start gap-3'>
+                        <AlertCircle className='h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5' />
+                        <div>
+                          <h5 className='font-semibold text-amber-900 mb-1'>File Size Limits</h5>
+                          <p className='text-sm text-amber-800'>
+                            • Maximum <strong>10MB per file</strong><br />
+                            • Maximum <strong>5 files</strong> per bug report<br />
+                            • Compress large images before uploading
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Enhanced MyBugsPanel */}
+                <Card>
+                  <CardHeader>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <BarChart3 className='h-5 w-5 text-blue-600' />
+                          Enhanced Bug Viewing
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Completely redesigned MyBugsPanel with statistics and advanced filtering
+                        </CardDescription>
+                      </div>
+                      <div className='inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold'>
+                        ENHANCED in v1.3.0
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+                      <h5 className='font-semibold text-blue-900 mb-2'>What's New</h5>
+                      <ul className='space-y-1.5 text-sm text-blue-800'>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Statistics Dashboard</strong> - Total, Open, In Progress, Resolved counts</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Advanced Filtering</strong> - Filter by All, Open, In Progress, Resolved, Closed</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Expandable Cards</strong> - Click to view full bug details</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Attachment Grid Viewer</strong> - View all files with image previews</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Screenshot Preview</strong> - Integrated screenshot viewer</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Color-coded Badges</strong> - Status and category visual indicators</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Smart Dates</strong> - "Just now", "5m ago", "2h ago" formatting</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Mobile Responsive</strong> - Works perfectly on all devices</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className='font-semibold mb-2'>Usage Example</h5>
+                      <p className='text-sm text-muted-foreground mb-3'>
+                        Add the MyBugsPanel component to any page where users should see their bugs:
+                      </p>
+                      <div className='bg-slate-950 text-slate-50 rounded-lg p-4 font-mono text-xs overflow-x-auto'>
+                        <pre>{`import { MyBugsPanel } from '@boobalan_jkkn/bug-reporter-sdk';
+
+export default function MyBugsPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">My Bug Reports</h1>
+
+      {/* No props needed - uses context from BugReporterProvider */}
+      <MyBugsPanel />
+
+      {/* Features:
+        ✓ Statistics bar at top
+        ✓ Status filter tabs
+        ✓ Expandable bug cards
+        ✓ Attachment viewer
+        ✓ Screenshot preview
+        ✓ Status badges
+        ✓ Empty states
+      */}
+    </div>
+  );
+}`}</pre>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Leaderboard System */}
+                <Card>
+                  <CardHeader>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <Trophy className='h-5 w-5 text-amber-600' />
+                          Leaderboard System
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Track and reward top bug reporters with medals, points, and prizes
+                        </CardDescription>
+                      </div>
+                      <div className='inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold'>
+                        NEW in v1.3.0
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='bg-amber-50 border border-amber-200 rounded-lg p-4'>
+                      <h5 className='font-semibold text-amber-900 mb-2'>Key Features</h5>
+                      <ul className='space-y-1.5 text-sm text-amber-800'>
+                        <li className='flex items-start gap-2'>
+                          <Trophy className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Medal System</strong> - Gold, Silver, Bronze for top 3 positions</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Period Toggles</strong> - View All Time, This Week, or This Month rankings</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Prize Display</strong> - Shows weekly and monthly prize amounts</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Points System</strong> - Configurable points per priority (Low/Medium/High/Critical)</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>User Profiles</strong> - Avatars, names, emails displayed</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Rankings Table</strong> - Professional leaderboard design</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className='font-semibold mb-2'>Usage Example</h5>
+                      <p className='text-sm text-muted-foreground mb-3'>
+                        Add the LeaderboardPanel component to display top bug reporters:
+                      </p>
+                      <div className='bg-slate-950 text-slate-50 rounded-lg p-4 font-mono text-xs overflow-x-auto'>
+                        <pre>{`import { LeaderboardPanel } from '@boobalan_jkkn/bug-reporter-sdk';
+
+export default function LeaderboardPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Top Bug Reporters</h1>
+
+      <LeaderboardPanel
+        applicationId="your-app-id"  // Required: Your application ID
+        limit={10}                    // Optional: Max entries (default: 10)
+        defaultPeriod="all-time"      // Optional: 'all-time' | 'weekly' | 'monthly'
+      />
+
+      {/* Features:
+        ✓ Period selector (All Time / This Week / This Month)
+        ✓ Prize information card
+        ✓ Points system breakdown
+        ✓ Top 3 with medal icons
+        ✓ User avatars with initials fallback
+        ✓ Sortable rankings
+        ✓ Empty state handling
+        ✓ Disabled state support
+      */}
+    </div>
+  );
+}`}</pre>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h5 className='font-semibold mb-2'>Props Reference</h5>
+                      <div className='overflow-x-auto'>
+                        <table className='w-full text-sm border rounded-lg'>
+                          <thead className='bg-slate-100'>
+                            <tr>
+                              <th className='text-left p-3 font-semibold border-b'>Prop</th>
+                              <th className='text-left p-3 font-semibold border-b'>Type</th>
+                              <th className='text-left p-3 font-semibold border-b'>Required</th>
+                              <th className='text-left p-3 font-semibold border-b'>Default</th>
+                              <th className='text-left p-3 font-semibold border-b'>Description</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className='border-b'>
+                              <td className='p-3 font-mono text-xs'>applicationId</td>
+                              <td className='p-3 font-mono text-xs'>string</td>
+                              <td className='p-3'><span className='px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs'>Yes</span></td>
+                              <td className='p-3'>-</td>
+                              <td className='p-3'>Application ID to show leaderboard for</td>
+                            </tr>
+                            <tr className='border-b'>
+                              <td className='p-3 font-mono text-xs'>limit</td>
+                              <td className='p-3 font-mono text-xs'>number</td>
+                              <td className='p-3'><span className='px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs'>No</span></td>
+                              <td className='p-3 font-mono text-xs'>10</td>
+                              <td className='p-3'>Maximum number of entries to display</td>
+                            </tr>
+                            <tr>
+                              <td className='p-3 font-mono text-xs'>defaultPeriod</td>
+                              <td className='p-3 font-mono text-xs'>'all-time' | 'weekly' | 'monthly'</td>
+                              <td className='p-3'><span className='px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs'>No</span></td>
+                              <td className='p-3 font-mono text-xs'>'all-time'</td>
+                              <td className='p-3'>Initial time period to display</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Network Request Capture */}
+                <Card>
+                  <CardHeader>
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div>
+                        <CardTitle className='flex items-center gap-2'>
+                          <Network className='h-5 w-5 text-green-600' />
+                          Network Request Capture
+                        </CardTitle>
+                        <CardDescription className='mt-1.5'>
+                          Automatically capture HTTP/XHR requests for debugging context (from v1.2.0)
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
+                      <h5 className='font-semibold text-green-900 mb-2'>Key Features</h5>
+                      <ul className='space-y-1.5 text-sm text-green-800'>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Automatic Capture</strong> - Intercepts fetch() and XMLHttpRequest</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Circular Buffer</strong> - Stores last N requests (default: 10)</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Security</strong> - Automatically filters sensitive headers (Authorization, Cookie, API keys)</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Custom Exclusions</strong> - Configure URL patterns to exclude from capture</span>
+                        </li>
+                        <li className='flex items-start gap-2'>
+                          <CheckCircle2 className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                          <span><strong>Self-Excluding</strong> - SDK's own API calls are automatically excluded</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className='font-semibold mb-2'>Configuration Example</h5>
+                      <p className='text-sm text-muted-foreground mb-3'>
+                        Customize network capture behavior:
+                      </p>
+                      <div className='bg-slate-950 text-slate-50 rounded-lg p-4 font-mono text-xs overflow-x-auto'>
+                        <pre>{`<BugReporterProvider
+  apiKey={process.env.NEXT_PUBLIC_BUG_REPORTER_API_KEY!}
+  apiUrl={process.env.NEXT_PUBLIC_BUG_REPORTER_API_URL!}
+
+  // Network capture configuration
+  networkCapture={true}              // Enable/disable (default: true)
+  networkBufferSize={10}             // Max requests to store (default: 10)
+  networkExcludePatterns={[          // Custom exclusions
+    /analytics\\.google\\.com/,
+    /tracking-service\\.com/,
+    /\\/api\\/internal\\//
+  ]}
+>
+  {children}
+</BugReporterProvider>
+
+// Network requests are automatically captured and sent with bug reports!`}</pre>
+                      </div>
+                    </div>
+
+                    <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+                      <div className='flex items-start gap-3'>
+                        <AlertCircle className='h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5' />
+                        <div>
+                          <h5 className='font-semibold text-blue-900 mb-1'>Privacy Note</h5>
+                          <p className='text-sm text-blue-800'>
+                            • Request/response <strong>bodies are NOT captured</strong> for privacy and performance<br />
+                            • Sensitive headers are automatically filtered<br />
+                            • Only last N requests are kept (configurable)<br />
+                            • SDK's own API calls are excluded to prevent recursion
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -699,7 +1107,7 @@ function MyComponent() {
                       </div>
 
                       <div className='border-l-4 border-orange-500 bg-orange-50 p-4 rounded'>
-                        <h5 className='font-semibold mb-1'>How to update to v1.1.0?</h5>
+                        <h5 className='font-semibold mb-1'>How to update to v1.3.0?</h5>
                         <p className='text-sm text-muted-foreground mb-2'>
                           If you already have the SDK installed, update to the latest version:
                         </p>
@@ -710,6 +1118,50 @@ function MyComponent() {
                           ✅ No breaking changes - fully backward compatible!<br />
                           ✅ New features work automatically<br />
                           ✅ No configuration changes needed
+                        </p>
+                      </div>
+
+                      <div className='border-l-4 border-purple-500 bg-purple-50 p-4 rounded'>
+                        <h5 className='font-semibold mb-1'>File upload fails? (v1.3.0)</h5>
+                        <p className='text-sm text-muted-foreground'>
+                          • Check file size: Max <strong>10MB per file</strong><br />
+                          • Check file type: Only images, PDF, TXT, CSV, JSON allowed<br />
+                          • Check file count: Max <strong>5 files</strong> per report<br />
+                          • Verify Supabase Storage bucket is created and public<br />
+                          • Check browser console for upload errors
+                        </p>
+                      </div>
+
+                      <div className='border-l-4 border-cyan-500 bg-cyan-50 p-4 rounded'>
+                        <h5 className='font-semibold mb-1'>Leaderboard not showing? (v1.3.0)</h5>
+                        <p className='text-sm text-muted-foreground'>
+                          • <strong>"Leaderboard is disabled"</strong> message: Enable in organization settings<br />
+                          • Verify correct <code className='bg-cyan-100 px-1 rounded text-xs'>applicationId</code> prop<br />
+                          • Check API key has access to application<br />
+                          • Open browser DevTools Network tab to see API errors<br />
+                          • Ensure organization has leaderboard config created
+                        </p>
+                      </div>
+
+                      <div className='border-l-4 border-indigo-500 bg-indigo-50 p-4 rounded'>
+                        <h5 className='font-semibold mb-1'>MyBugsPanel not showing data? (v1.3.0)</h5>
+                        <p className='text-sm text-muted-foreground'>
+                          • Verify API key and URL are correct<br />
+                          • Check that bugs exist for this application<br />
+                          • Open browser console for error messages<br />
+                          • Ensure <code className='bg-indigo-100 px-1 rounded text-xs'>BugReporterProvider</code> wraps the component<br />
+                          • Verify user has submitted bugs (panel shows user's own bugs only)
+                        </p>
+                      </div>
+
+                      <div className='border-l-4 border-teal-500 bg-teal-50 p-4 rounded'>
+                        <h5 className='font-semibold mb-1'>Network requests not captured? (v1.2.0+)</h5>
+                        <p className='text-sm text-muted-foreground'>
+                          • Verify <code className='bg-teal-100 px-1 rounded text-xs'>networkCapture</code> prop is not explicitly <code className='bg-teal-100 px-1 rounded text-xs'>false</code><br />
+                          • Check console for "Network interceptor initialized" message<br />
+                          • Requests might match exclude patterns<br />
+                          • Reduce <code className='bg-teal-100 px-1 rounded text-xs'>networkBufferSize</code> if too many requests<br />
+                          • SDK's own API calls are automatically excluded
                         </p>
                       </div>
                     </div>

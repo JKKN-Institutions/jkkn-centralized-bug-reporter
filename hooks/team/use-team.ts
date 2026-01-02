@@ -8,7 +8,7 @@ import type {
   InviteMemberPayload,
   UpdateMemberRolePayload,
   TeamStats,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 import toast from 'react-hot-toast';
 
 /**

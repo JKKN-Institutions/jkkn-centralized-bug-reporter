@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bug, Clock, CheckCircle2, Eye, FileX, Sparkles } from 'lucide-react';
-import type { BugReportStats } from '@bug-reporter/shared';
+import type { BugReportStats } from '@boobalan_jkkn/shared';
 
 interface BugStatsCardsProps {
   stats: BugReportStats | null;

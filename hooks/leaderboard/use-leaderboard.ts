@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LeaderboardClientService } from '@/lib/services/leaderboard/client';
-import type { LeaderboardEntry, LeaderboardTimePeriod } from '@bug-reporter/shared';
+import type { LeaderboardEntry, LeaderboardTimePeriod } from '@boobalan_jkkn/shared';
 
 /**
  * Hook to fetch leaderboard entries for an organization

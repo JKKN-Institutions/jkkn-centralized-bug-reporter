@@ -5,7 +5,7 @@ import type {
   Organization,
   CreateOrganizationPayload,
   UpdateOrganizationPayload,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 export class OrganizationClientService {
   /**

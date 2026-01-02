@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import type { Organization } from '@bug-reporter/shared';
+import type { Organization } from '@boobalan_jkkn/shared';
 import { useOrganization } from './use-organizations';
 import { useUserRole } from './use-user-role';
 

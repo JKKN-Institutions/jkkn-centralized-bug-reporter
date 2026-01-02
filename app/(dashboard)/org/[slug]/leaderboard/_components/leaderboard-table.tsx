@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Trophy } from 'lucide-react';
-import type { LeaderboardEntry } from '@bug-reporter/shared';
+import type { LeaderboardEntry } from '@boobalan_jkkn/shared';
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[];

@@ -9,7 +9,7 @@ import type {
   BugReportMessage,
   UpdateBugReportPayload,
   BugReportStats,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 import toast from 'react-hot-toast';
 
 /**

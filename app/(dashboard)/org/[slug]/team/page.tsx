@@ -8,7 +8,7 @@ import { TeamStatsCards } from './_components/team-stats-cards';
 import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
 import Link from 'next/link';
-import type { InviteMemberPayload } from '@bug-reporter/shared';
+import type { InviteMemberPayload } from '@boobalan_jkkn/shared';
 
 export default function TeamPage() {
   const { organization, userRole, loading: orgLoading } = useOrganizationContext();

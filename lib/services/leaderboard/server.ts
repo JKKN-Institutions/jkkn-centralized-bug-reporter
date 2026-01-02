@@ -3,7 +3,7 @@ import type {
   LeaderboardEntry,
   LeaderboardConfig,
   LeaderboardTimePeriod,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 interface BugMetadata {
   points?: number;

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import type { OrganizationMember, TeamStats } from '@bug-reporter/shared';
+import type { OrganizationMember, TeamStats } from '@boobalan_jkkn/shared';
 
 export class TeamServerService {
   /**

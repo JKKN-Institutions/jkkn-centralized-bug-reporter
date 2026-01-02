@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { OrganizationClientService } from '@/lib/services/organizations/client';
-import type { Organization, CreateOrganizationPayload, UpdateOrganizationPayload } from '@bug-reporter/shared';
+import type { Organization, CreateOrganizationPayload, UpdateOrganizationPayload } from '@boobalan_jkkn/shared';
 import toast from 'react-hot-toast';
 
 export function useOrganizations(includeAllForAdmin = false) {

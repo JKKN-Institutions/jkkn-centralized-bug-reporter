@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { DismissSuggestionPayload, DismissSuggestionResponse } from '@bug-reporter/shared';
+import type { DismissSuggestionPayload, DismissSuggestionResponse } from '@boobalan_jkkn/shared';
 
 /**
  * POST /api/v1/bug-reports/[id]/similar/dismiss

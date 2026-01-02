@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LeaderboardClientService } from '@/lib/services/leaderboard/client';
-import type { LeaderboardConfig, UpdateLeaderboardConfigPayload } from '@bug-reporter/shared';
+import type { LeaderboardConfig, UpdateLeaderboardConfigPayload } from '@boobalan_jkkn/shared';
 import toast from 'react-hot-toast';
 
 /**

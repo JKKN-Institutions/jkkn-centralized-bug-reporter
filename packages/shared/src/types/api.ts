@@ -24,6 +24,21 @@ export interface NetworkRequest {
 }
 
 // =============================================
+// FILE ATTACHMENTS
+// =============================================
+
+/**
+ * File attachment for bug reports
+ */
+export interface Attachment {
+  filename: string;            // Original filename
+  filesize: number;            // File size in bytes
+  filetype: string;            // MIME type (e.g., 'image/png', 'text/plain')
+  data_url?: string;           // Base64 data URL for upload (client → server)
+  url?: string;                // Public URL after upload (server → client)
+}
+
+// =============================================
 // API RESPONSE WRAPPER
 // =============================================
 
@@ -116,6 +131,9 @@ export interface SubmitBugReportRequest {
 
   // Network trace (captured by SDK)
   network_trace?: NetworkRequest[];
+
+  // File attachments
+  attachments?: Attachment[];
 
   // Reporter information (optional)
   reporter_name?: string;

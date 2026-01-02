@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import type { Application } from '@bug-reporter/shared';
+import type { Application } from '@boobalan_jkkn/shared';
 
 export class ApplicationServerService {
   /**

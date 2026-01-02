@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMessageReactions } from '@/hooks/messaging/use-message-reactions';
-import type { MessageReaction } from '@bug-reporter/shared';
+import type { MessageReaction } from '@boobalan_jkkn/shared';
 import { Smile } from 'lucide-react';
 
 interface MessageReactionsProps {

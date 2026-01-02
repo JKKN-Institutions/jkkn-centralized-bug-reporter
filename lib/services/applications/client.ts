@@ -7,7 +7,7 @@ import type {
   CreateApplicationPayload,
   UpdateApplicationPayload,
   RegenerateApiKeyResponse,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 export class ApplicationClientService {
   /**

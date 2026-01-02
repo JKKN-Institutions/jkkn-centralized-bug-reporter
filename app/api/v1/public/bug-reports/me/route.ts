@@ -9,7 +9,7 @@ import type {
   GetMyBugReportsResponse,
   ApiRequestContext,
   BugReport,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 /**
  * GET /api/v1/public/bug-reports/me

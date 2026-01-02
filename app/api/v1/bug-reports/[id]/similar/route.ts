@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { SimilarBug, SimilarBugsResult, GetSimilarBugsResponse } from '@bug-reporter/shared';
+import type { SimilarBug, SimilarBugsResult, GetSimilarBugsResponse } from '@boobalan_jkkn/shared';
 
 // Similarity thresholds
 const DUPLICATE_THRESHOLD = 0.9;

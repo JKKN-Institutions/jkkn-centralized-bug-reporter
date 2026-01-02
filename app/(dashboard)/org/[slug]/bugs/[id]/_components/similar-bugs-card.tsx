@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSimilarBugsWithDismiss } from '@/hooks/bug-reports/use-similar-bugs';
-import type { SimilarBug, SuggestionType } from '@bug-reporter/shared';
+import type { SimilarBug, SuggestionType } from '@boobalan_jkkn/shared';
 import { BugStatusBadge } from '../../_components/bug-status-badge';
 
 interface SimilarBugsCardProps {

@@ -10,7 +10,7 @@ import type {
   SendBugReportMessageResponse,
   ApiRequestContext,
   EnhancedBugReportMessage,
-} from '@bug-reporter/shared';
+} from '@boobalan_jkkn/shared';
 
 /**
  * POST /api/v1/public/bug-reports/:id/messages

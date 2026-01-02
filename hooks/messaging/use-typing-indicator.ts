@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { MessagingClientService } from '@/lib/services/messaging/client';
-import type { TypingIndicator } from '@bug-reporter/shared';
+import type { TypingIndicator } from '@boobalan_jkkn/shared';
 
 /**
  * Hook for typing indicators with real-time updates

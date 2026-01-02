@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import type { CreateOrganizationPayload, Organization } from '@bug-reporter/shared';
+import type { CreateOrganizationPayload, Organization } from '@boobalan_jkkn/shared';
 
 /**
  * Server Action to create organization
@@ -25,7 +25,7 @@ export async function createOrganizationAction(
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet) {
+          setAll(cookiesToSet: { name: string; value: string; options: Record<string, unknown> }[]) {
             try {
               cookiesToSet.forEach(({ name, value, options }) =>
                 cookieStore.set(name, value, options)

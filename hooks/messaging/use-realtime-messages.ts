@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { MessagingClientService } from '@/lib/services/messaging/client';
-import type { EnhancedBugReportMessage } from '@bug-reporter/shared';
+import type { EnhancedBugReportMessage } from '@boobalan_jkkn/shared';
 
 /**
  * Hook for real-time messages with Supabase Realtime

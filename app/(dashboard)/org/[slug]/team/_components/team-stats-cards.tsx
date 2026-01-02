@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Shield, UserCog, Code, Mail } from 'lucide-react';
-import type { TeamStats } from '@bug-reporter/shared';
+import type { TeamStats } from '@boobalan_jkkn/shared';
 
 interface TeamStatsCardsProps {
   stats: TeamStats | null;

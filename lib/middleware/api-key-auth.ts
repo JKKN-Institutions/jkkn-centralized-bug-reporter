@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import type { ApiResponse, ApiRequestContext } from '@bug-reporter/shared';
+import type { ApiResponse, ApiRequestContext } from '@boobalan_jkkn/shared';
 
 /**
  * API Key Authentication Middleware

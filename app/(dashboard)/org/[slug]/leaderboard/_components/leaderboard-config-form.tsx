@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { LeaderboardConfig } from '@bug-reporter/shared';
+import type { LeaderboardConfig } from '@boobalan_jkkn/shared';
 
 const formSchema = z.object({
   is_enabled: z.coerce.boolean(),
