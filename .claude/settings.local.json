@@ -8,7 +8,13 @@
       "Bash(dir:*)",
       "Bash(npm install:*)",
       "mcp__next-devtools__init",
-      "WebSearch"
+      "WebSearch",
+      "mcp__next-devtools__nextjs_index",
+      "mcp__next-devtools__nextjs_call",
+      "Bash(npm view:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(findstr:*)",
+      "Bash(npm audit fix:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
