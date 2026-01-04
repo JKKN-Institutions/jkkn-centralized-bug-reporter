@@ -192,6 +192,20 @@ export interface GetBugReportDetailsResponse {
 }
 
 // =============================================
+// UPDATE BUG REPORT STATUS (Public API)
+// =============================================
+
+export interface UpdateBugReportStatusRequest {
+  status?: 'open' | 'in_progress' | 'resolved' | 'closed';
+  resolution_notes?: string;
+}
+
+export interface UpdateBugReportStatusResponse {
+  bug_report: BugReport;
+  message: string;
+}
+
+// =============================================
 // SEND MESSAGE
 // =============================================
 

@@ -7,6 +7,8 @@ import {
 } from '@/lib/middleware/api-key-auth';
 import type {
   GetBugReportDetailsResponse,
+  UpdateBugReportStatusRequest,
+  UpdateBugReportStatusResponse,
   ApiRequestContext,
   BugReport,
   EnhancedBugReportMessage,
@@ -154,6 +156,139 @@ export const GET = withApiKeyAuth(
       return createApiErrorResponse(
         'INTERNAL_ERROR',
         'An unexpected error occurred while fetching bug report',
+        500
+      );
+    }
+  }
+);
+
+/**
+ * PATCH /api/v1/public/bug-reports/:id
+ * Update a bug report's status
+ * Requires API key authentication
+ *
+ * Request body:
+ * - status: 'open' | 'in_progress' | 'resolved' | 'closed'
+ * - resolution_notes: Optional notes about the resolution
+ */
+export const PATCH = withApiKeyAuth(
+  async (
+    request: NextRequest,
+    context: ApiRequestContext,
+    routeContext?: { params: Promise<Record<string, string>> }
+  ) => {
+    try {
+      const params = await routeContext!.params;
+      const { id } = params;
+      const body = (await request.json()) as UpdateBugReportStatusRequest;
+
+      // Validate status if provided
+      const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
+      if (body.status && !validStatuses.includes(body.status)) {
+        return createApiErrorResponse(
+          'VALIDATION_ERROR',
+          `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+          400
+        );
+      }
+
+      // Create Supabase client
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        }
+      );
+
+      // First verify the bug report exists and belongs to this application
+      const { data: existingBug, error: fetchError } = await supabase
+        .from('bug_reports')
+        .select('id, status')
+        .eq('id', id)
+        .eq('application_id', context.application.id)
+        .single();
+
+      if (fetchError || !existingBug) {
+        return createApiErrorResponse(
+          'BUG_REPORT_NOT_FOUND',
+          'Bug report not found or does not belong to this application',
+          404
+        );
+      }
+
+      // Build update payload
+      const updatePayload: Record<string, any> = {
+        updated_at: new Date().toISOString(),
+      };
+
+      if (body.status) {
+        updatePayload.status = body.status;
+        // Set is_resolved and resolved_at for resolved/closed status
+        if (body.status === 'resolved' || body.status === 'closed') {
+          updatePayload.is_resolved = true;
+          updatePayload.resolved_at = new Date().toISOString();
+        } else {
+          updatePayload.is_resolved = false;
+          updatePayload.resolved_at = null;
+        }
+      }
+
+      // Update the bug report
+      const { data: updatedBug, error: updateError } = await supabase
+        .from('bug_reports')
+        .update(updatePayload)
+        .eq('id', id)
+        .select(
+          `
+          *,
+          application:applications(id, name, slug),
+          organization:organizations(id, name)
+        `
+        )
+        .single();
+
+      if (updateError) {
+        console.error('[BugReportAPI /:id PATCH] Update error:', updateError);
+        return createApiErrorResponse(
+          'INTERNAL_ERROR',
+          'Failed to update bug report',
+          500,
+          { error: updateError.message }
+        );
+      }
+
+      // If resolution_notes provided, add as a system message
+      if (body.resolution_notes) {
+        await supabase.from('bug_report_messages').insert({
+          bug_report_id: id,
+          message_text: `[Status Update] ${body.resolution_notes}`,
+          message_type: 'system',
+          sender_user_id: null, // System message
+        });
+      }
+
+      const response: UpdateBugReportStatusResponse = {
+        bug_report: updatedBug as BugReport,
+        message: `Bug report status updated to ${body.status || 'unchanged'}`,
+      };
+
+      console.log('[BugReportAPI /:id PATCH] Updated bug report:', {
+        id,
+        application: context.application.name,
+        old_status: existingBug.status,
+        new_status: body.status,
+      });
+
+      return createApiSuccessResponse(response, 200);
+    } catch (error) {
+      console.error('[BugReportAPI /:id PATCH] Unexpected error:', error);
+      return createApiErrorResponse(
+        'INTERNAL_ERROR',
+        'An unexpected error occurred while updating bug report',
         500
       );
     }
