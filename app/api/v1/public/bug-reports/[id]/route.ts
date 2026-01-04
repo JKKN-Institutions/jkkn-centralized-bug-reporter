@@ -182,8 +182,8 @@ export const PATCH = withApiKeyAuth(
       const { id } = params;
       const body = (await request.json()) as UpdateBugReportStatusRequest;
 
-      // Validate status if provided
-      const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
+      // Validate status if provided (matches database schema)
+      const validStatuses = ['new', 'seen', 'in_progress', 'resolved', 'wont_fix'];
       if (body.status && !validStatuses.includes(body.status)) {
         return createApiErrorResponse(
           'VALIDATION_ERROR',
@@ -220,20 +220,14 @@ export const PATCH = withApiKeyAuth(
         );
       }
 
-      // Build update payload
-      const updatePayload: Record<string, any> = {
-        updated_at: new Date().toISOString(),
-      };
+      // Build update payload (only columns that exist in bug_reports table)
+      const updatePayload: Record<string, any> = {};
 
       if (body.status) {
         updatePayload.status = body.status;
-        // Set is_resolved and resolved_at for resolved/closed status
-        if (body.status === 'resolved' || body.status === 'closed') {
-          updatePayload.is_resolved = true;
+        // Set resolved_at for resolved/wont_fix status
+        if (body.status === 'resolved' || body.status === 'wont_fix') {
           updatePayload.resolved_at = new Date().toISOString();
-        } else {
-          updatePayload.is_resolved = false;
-          updatePayload.resolved_at = null;
         }
       }
 

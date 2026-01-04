@@ -158,7 +158,7 @@ export interface GetMyBugReportsRequest {
   limit?: number;
 
   // Filters
-  status?: 'open' | 'in_progress' | 'resolved' | 'closed';
+  status?: 'new' | 'seen' | 'in_progress' | 'resolved' | 'wont_fix';
   category?: BugReportCategory;
   search?: string;
 
@@ -196,7 +196,7 @@ export interface GetBugReportDetailsResponse {
 // =============================================
 
 export interface UpdateBugReportStatusRequest {
-  status?: 'open' | 'in_progress' | 'resolved' | 'closed';
+  status?: 'new' | 'seen' | 'in_progress' | 'resolved' | 'wont_fix';
   resolution_notes?: string;
 }
 
