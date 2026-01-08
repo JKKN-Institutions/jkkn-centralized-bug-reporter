@@ -38,9 +38,8 @@ export class LeaderboardClientService {
 
       let query = supabase
         .from('bug_reports')
-        .select('reporter_user_id, metadata')
-        .eq('organization_id', organizationId)
-        .not('reporter_user_id', 'is', null);
+        .select('reporter_user_id, metadata, status')
+        .eq('organization_id', organizationId);
 
       if (dateFilter) {
         query = query.gte('created_at', dateFilter.toISOString());
@@ -52,30 +51,49 @@ export class LeaderboardClientService {
       // Group by reporter and calculate totals
       const leaderboardMap = new Map<string, LeaderboardEntry>();
 
-      // Fetch user details
-      const userIds = Array.from(new Set(data?.map((bug) => bug.reporter_user_id) || []));
-      const { data: users } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .in('id', userIds);
+      // Fetch user details for bugs with reporter_user_id
+      const userIds = Array.from(new Set(data?.filter(bug => bug.reporter_user_id).map((bug) => bug.reporter_user_id) || []));
+      let userMap = new Map<string, any>();
 
-      const userMap = new Map(users?.map((u) => [u.id, u]) || []);
+      if (userIds.length > 0) {
+        const { data: users } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+        userMap = new Map(users?.map((u) => [u.id, u]) || []);
+      }
 
       data?.forEach((bug) => {
-        const userId = bug.reporter_user_id;
-        if (!userId) return;
+        // Try to get reporter info from user_id first, then from metadata
+        let reporterEmail: string;
+        let reporterName: string | undefined;
 
-        const user = userMap.get(userId);
-        const points = (bug.metadata as BugMetadata)?.points || 0;
+        if (bug.reporter_user_id) {
+          const user = userMap.get(bug.reporter_user_id);
+          reporterEmail = user?.email || 'Unknown';
+          reporterName = user?.full_name;
+        } else {
+          // Get from metadata
+          const metadata = bug.metadata as any;
+          reporterEmail = metadata?.reporter_email || 'Anonymous';
+          reporterName = metadata?.reporter_name;
+        }
 
-        const existing = leaderboardMap.get(userId);
+        // Skip anonymous reporters
+        if (reporterEmail === 'Anonymous') return;
+
+        // Calculate points - default 10 points per bug, or use metadata points if available
+        const metadataPoints = (bug.metadata as BugMetadata)?.points;
+        const points = metadataPoints || 10;
+
+        const existing = leaderboardMap.get(reporterEmail);
         if (existing) {
           existing.total_bugs += 1;
           existing.total_points += points;
         } else {
-          leaderboardMap.set(userId, {
-            reporter_email: user?.email || 'Unknown',
-            reporter_name: user?.full_name,
+          leaderboardMap.set(reporterEmail, {
+            reporter_email: reporterEmail,
+            reporter_name: reporterName,
             total_bugs: 1,
             total_points: points,
             rank: 0,

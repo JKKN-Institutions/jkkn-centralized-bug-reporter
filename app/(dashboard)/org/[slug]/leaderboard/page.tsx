@@ -43,19 +43,21 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bug Reporter Leaderboard</h1>
-          <p className="text-muted-foreground">
-            Top bug reporters and their rankings
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Bug Reporter Leaderboard
+          </h1>
+          <p className="text-base text-muted-foreground">
+            Recognize and reward top contributors in your organization
           </p>
         </div>
         {canManageSettings && (
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="lg" className="shadow-sm hover:shadow-md transition-shadow" asChild>
             <Link href={`/org/${organization.slug}/leaderboard/settings`}>
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-5 w-5" />
               Prize Settings
             </Link>
           </Button>
@@ -66,20 +68,29 @@ export default function LeaderboardPage() {
       <PrizeCard config={config} />
 
       {/* Leaderboard */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Rankings</CardTitle>
+      <Card className="shadow-lg border-2">
+        <CardHeader className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b-2">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              🏆 Rankings
+            </CardTitle>
             <TimePeriodTabs value={timePeriod} onChange={setTimePeriod} />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {entriesLoading ? (
-            <div className="text-center py-12">Loading...</div>
+            <div className="text-center py-16">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+              <p className="mt-4 text-muted-foreground">Loading leaderboard...</p>
+            </div>
           ) : (
             <>
-              {topThree.length > 0 && <LeaderboardPodium topThree={topThree} />}
-              <div className="mt-6">
+              {topThree.length > 0 && (
+                <div className="bg-gradient-to-b from-slate-50 to-white border-b-2">
+                  <LeaderboardPodium topThree={topThree} />
+                </div>
+              )}
+              <div className="p-6">
                 <LeaderboardTable entries={entries} />
               </div>
             </>

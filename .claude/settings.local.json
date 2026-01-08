@@ -14,7 +14,10 @@
       "Bash(npm view:*)",
       "WebFetch(domain:github.com)",
       "Bash(findstr:*)",
-      "Bash(npm audit fix:*)"
+      "Bash(npm audit fix:*)",
+      "Bash(npm run dev:*)",
+      "Bash(ls:*)",
+      "mcp__supabase__list_tables"
     ]
   },
   "enableAllProjectMcpServers": true,

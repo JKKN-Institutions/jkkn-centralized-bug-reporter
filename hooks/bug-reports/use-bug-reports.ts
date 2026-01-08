@@ -25,7 +25,7 @@ export function useBugReports(
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<BugReportFilters>(initialFilters);
-  const pageSize = 20;
+  const pageSize = 10000; // Fetch all bugs for client-side pagination
 
   const fetchBugs = useCallback(async () => {
     if (!organizationId) {
