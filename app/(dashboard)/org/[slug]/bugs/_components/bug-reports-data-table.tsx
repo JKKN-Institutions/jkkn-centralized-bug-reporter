@@ -49,13 +49,15 @@ interface BugReportsDataTableProps {
   organizationSlug: string;
   applications: Application[];
   applicationsLoading?: boolean;
+  initialAppSlug?: string;
 }
 
 export function BugReportsDataTable({
   data,
   organizationSlug,
   applications,
-  applicationsLoading = false
+  applicationsLoading = false,
+  initialAppSlug
 }: BugReportsDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'created_at', desc: true }
@@ -67,6 +69,7 @@ export function BugReportsDataTable({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState('');
+  const initialAppApplied = React.useRef(false);
 
   const columns: ColumnDef<BugReport>[] = [
     {
@@ -260,6 +263,15 @@ export function BugReportsDataTable({
       globalFilter
     }
   });
+
+  React.useEffect(() => {
+    if (initialAppApplied.current) return;
+    if (!initialAppSlug || applications.length === 0) return;
+    const match = applications.find((a) => a.slug === initialAppSlug);
+    if (!match) return;
+    table.getColumn('application')?.setFilterValue(match.id);
+    initialAppApplied.current = true;
+  }, [initialAppSlug, applications, table]);
 
   return (
     <div className='w-full space-y-4'>
