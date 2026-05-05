@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +17,9 @@ import { BugStatsCards } from './_components/bug-stats-cards';
 import toast from 'react-hot-toast';
 
 export default function BugsPage() {
+  const searchParams = useSearchParams();
+  const initialAppSlug = searchParams.get('app') || undefined;
+
   const { organization, loading: orgLoading } = useOrganizationContext();
   const {
     bugs,
@@ -161,6 +165,7 @@ export default function BugsPage() {
           organizationSlug={organization.slug}
           applications={applications}
           applicationsLoading={appsLoading}
+          initialAppSlug={initialAppSlug}
         />
       )}
     </div>
