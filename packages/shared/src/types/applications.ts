@@ -11,6 +11,12 @@ export interface Application {
   settings?: {
     allowed_domains?: string[];
     webhook_url?: string;
+    github_repo?: string;
+    deploy_hook_url?: string;
+    test_credentials_note?: string;
+    auto_triage_policy?: {
+      auto_merge_eligible?: boolean;
+    };
     [key: string]: any;
   };
   _stats?: {

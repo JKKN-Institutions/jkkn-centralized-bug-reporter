@@ -55,7 +55,7 @@ export function FileUploader({
         multiple
         className="hidden"
         onChange={handleFileSelect}
-        accept="image/*,.pdf,.doc,.docx,.txt"
+        accept="image/*,.pdf,.doc,.docx,.txt,.xlsx,.xls,.csv,.json"
       />
 
       {files.length > 0 && (
