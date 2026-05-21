@@ -64,6 +64,15 @@ export interface BugReport {
   created_at: string;
   updated_at: string;
 
+  // Reopen tracking (Phase 2.1 — see /wirefix Step 6.6, /fixallbugs Step 2.4)
+  // Set by POST /api/v1/public/bug-reports/[id]/reopen when the reporter
+  // disputes a Resolved/Won't-Fix status. reopen_count >= 2 is a hard signal
+  // of misclassification — auto-triage refuses to attempt fixes.
+  reopened_at?: string | null;
+  reopen_reason?: string | null;
+  reopen_count?: number;
+  last_resolved_at?: string | null;
+
   // Optional relations (populated via joins)
   application?: {
     id: string;
