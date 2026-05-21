@@ -64,6 +64,15 @@ export interface BugReport {
   created_at: string;
   updated_at: string;
 
+  // Reopen tracking (added 2026-05-21 — see /api/v1/public/bug-reports/[id]/reopen)
+  // When a reporter disputes a Resolved status via the SDK, these capture the
+  // event. Auto-triage skills (/fixallbugs Step 2.4, /fixmyjkkn Step 2.4) HALT
+  // when reopened_at IS NOT NULL or reopen_count > 0 to prevent re-attempting
+  // a fix whose prior attempt failed verification.
+  reopened_at?: string | null;
+  reopen_reason?: string | null;
+  reopen_count: number;
+
   // Optional relations (populated via joins)
   application?: {
     id: string;
