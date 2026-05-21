@@ -149,6 +149,36 @@ export default function BugDetailPage() {
                 </dd>
               </div>
             )}
+            {bug.reopened_at && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-950/30">
+                <dt className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-200">
+                  <span className="inline-flex items-center rounded-full bg-amber-600 px-2 py-0.5 text-xs font-semibold text-white">
+                    REOPENED
+                  </span>
+                  {bug.reopen_count && bug.reopen_count > 1 ? (
+                    <span className="text-xs font-normal text-amber-700 dark:text-amber-300">
+                      ({bug.reopen_count} times — flagged for manual review)
+                    </span>
+                  ) : null}
+                </dt>
+                <dd className="mt-2 space-y-1 text-sm">
+                  <div className="text-amber-900 dark:text-amber-100">
+                    <span className="font-medium">Reason:</span>{' '}
+                    {bug.reopen_reason || '(no reason provided)'}
+                  </div>
+                  <div className="text-xs text-amber-700 dark:text-amber-300">
+                    Reporter reopened on {new Date(bug.reopened_at).toLocaleString()}
+                    {bug.last_resolved_at ? (
+                      <>
+                        {' '}
+                        · prior resolved at{' '}
+                        {new Date(bug.last_resolved_at).toLocaleString()}
+                      </>
+                    ) : null}
+                  </div>
+                </dd>
+              </div>
+            )}
           </CardContent>
         </Card>
 
