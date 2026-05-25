@@ -149,6 +149,30 @@ export default function BugDetailPage() {
                 </dd>
               </div>
             )}
+            {bug.reopened_at && (
+              <div className="rounded-md border border-orange-300 bg-orange-50 p-3 dark:border-orange-700 dark:bg-orange-950">
+                <dt className="flex items-center gap-2 text-sm font-semibold text-orange-700 dark:text-orange-300">
+                  ⚠ REOPENED by reporter
+                  <span className="rounded bg-orange-200 px-2 py-0.5 text-xs dark:bg-orange-800">
+                    ×{bug.reopen_count}
+                  </span>
+                </dt>
+                <dd className="mt-2 text-sm">
+                  <p className="text-muted-foreground">
+                    {new Date(bug.reopened_at).toLocaleString()}
+                  </p>
+                  {bug.reopen_reason && (
+                    <blockquote className="mt-2 border-l-2 border-orange-300 pl-3 italic dark:border-orange-700">
+                      "{bug.reopen_reason}"
+                    </blockquote>
+                  )}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    The reporter disputes the prior &quot;Resolved&quot; status. Do not re-mark Resolved without a fresh fix
+                    + verification. Auto-triage skills (/fixallbugs, /fixmyjkkn) HALT on reopened bugs.
+                  </p>
+                </dd>
+              </div>
+            )}
           </CardContent>
         </Card>
 

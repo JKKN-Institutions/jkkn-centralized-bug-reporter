@@ -206,6 +206,27 @@ export interface UpdateBugReportStatusResponse {
 }
 
 // =============================================
+// REOPEN BUG REPORT (Public API)
+// =============================================
+// PATCH /api/v1/public/bug-reports/[id]/reopen
+//
+// Lets the original reporter dispute a Resolved/Closed status. Server
+// flips status back to 'open', records reopened_at + reason, increments
+// reopen_count. Auth: standard SDK X-API-Key header. Reporter identity
+// verified via reporter_email matching bug.reporter_email (anonymous
+// bugs cannot be reopened — they have no reporter to verify against).
+
+export interface ReopenBugReportRequest {
+  reason: string;              // Required, min 10 chars
+  reporter_email: string;      // Required for identity verification
+}
+
+export interface ReopenBugReportResponse {
+  bug_report: BugReport;
+  message: string;
+}
+
+// =============================================
 // SEND MESSAGE
 // =============================================
 
