@@ -67,7 +67,12 @@ export const PATCH = withApiKeyAuth(
       }
 
       const reason = (body.reason ?? '').trim();
-      const reporterEmail = (body.reporter_email ?? '').trim().toLowerCase();
+      // 2026-05-25 — was `reporter_email` (TEXT). Switched to
+      // `reporter_user_id` (UUID) because the bug_reports table has
+      // reporter_user_id (FK to auth.users), NOT reporter_email. The
+      // previous code's SELECT errored at the DB level (column does
+      // not exist) and the error was masked as BUG_NOT_FOUND.
+      const reporterUserId = (body.reporter_user_id ?? '').trim();
 
       if (reason.length < MIN_REASON_LENGTH) {
         return createApiErrorResponse(
@@ -77,10 +82,13 @@ export const PATCH = withApiKeyAuth(
         );
       }
 
-      if (!reporterEmail || !reporterEmail.includes('@')) {
+      // UUID v4 sanity check — anything else can't possibly match a real
+      // auth.users id, so reject early with a clear error.
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!reporterUserId || !UUID_RE.test(reporterUserId)) {
         return createApiErrorResponse(
-          'MISSING_REPORTER_EMAIL',
-          'reporter_email is required and must be a valid email address. Anonymous bugs cannot be reopened.',
+          'MISSING_REPORTER_USER_ID',
+          'reporter_user_id is required and must be the UUID of the original reporter (from the consumer app\'s Supabase auth.users.id). Anonymous bugs cannot be reopened.',
           400
         );
       }
@@ -99,16 +107,38 @@ export const PATCH = withApiKeyAuth(
         }
       );
 
-      // Fetch the bug + verify cross-tenant safety in one query
+      // Fetch the bug + verify cross-tenant safety in one query.
+      // NOTE on columns: bug_reports has `status` (text) + `resolved_at`
+      // (timestamptz) + `reporter_user_id` (uuid). It does NOT have
+      // `is_resolved` or `reporter_email` — referencing those was the
+      // PR #5 mistake. Status alone determines resolution state.
       const { data: bug, error: fetchError } = await supabase
         .from('bug_reports')
         .select(
-          'id, application_id, status, reporter_email, reopen_count, is_resolved, resolved_at'
+          'id, application_id, status, reporter_user_id, reopen_count, resolved_at'
         )
         .eq('id', id)
         .single();
 
-      if (fetchError || !bug) {
+      // Distinguish "row missing" from "query failed" — the previous
+      // BUG_NOT_FOUND was returned for both, hiding column-mismatch errors.
+      if (fetchError) {
+        if ((fetchError as { code?: string }).code === 'PGRST116') {
+          // PGRST116 = no rows returned by .single()
+          return createApiErrorResponse(
+            'BUG_NOT_FOUND',
+            'Bug report not found.',
+            404
+          );
+        }
+        console.error('[reopen] DB fetch failed', fetchError);
+        return createApiErrorResponse(
+          'DB_FETCH_FAILED',
+          'Internal database error while looking up the bug. The team has been notified.',
+          500
+        );
+      }
+      if (!bug) {
         return createApiErrorResponse(
           'BUG_NOT_FOUND',
           'Bug report not found.',
@@ -125,16 +155,15 @@ export const PATCH = withApiKeyAuth(
         );
       }
 
-      // Identity gate: reporter_email must match
-      const bugReporterEmail = (bug.reporter_email ?? '').trim().toLowerCase();
-      if (!bugReporterEmail) {
+      // Identity gate: reporter_user_id must match
+      if (!bug.reporter_user_id) {
         return createApiErrorResponse(
           'BUG_IS_ANONYMOUS',
           'This bug was submitted anonymously and cannot be reopened. Submit a fresh bug report instead.',
           403
         );
       }
-      if (bugReporterEmail !== reporterEmail) {
+      if (bug.reporter_user_id !== reporterUserId) {
         return createApiErrorResponse(
           'REPORTER_MISMATCH',
           'Only the original reporter can reopen this bug.',
@@ -151,18 +180,18 @@ export const PATCH = withApiKeyAuth(
         );
       }
 
-      // Apply the reopen
+      // Apply the reopen. `is_resolved` dropped from the update body
+      // (column does not exist; status='open' + resolved_at=null is the
+      // canonical signal of un-resolution).
       const nowIso = new Date().toISOString();
       const { data: updated, error: updateError } = await supabase
         .from('bug_reports')
         .update({
           status: 'open',
-          is_resolved: false,
           resolved_at: null,
           reopened_at: nowIso,
           reopen_reason: reason,
           reopen_count: (bug.reopen_count ?? 0) + 1,
-          updated_at: nowIso,
         })
         .eq('id', id)
         .select('*')
