@@ -67,12 +67,14 @@ export const PATCH = withApiKeyAuth(
       }
 
       const reason = (body.reason ?? '').trim();
-      // 2026-05-25 — was `reporter_email` (TEXT). Switched to
-      // `reporter_user_id` (UUID) because the bug_reports table has
-      // reporter_user_id (FK to auth.users), NOT reporter_email. The
-      // previous code's SELECT errored at the DB level (column does
-      // not exist) and the error was masked as BUG_NOT_FOUND.
-      const reporterUserId = (body.reporter_user_id ?? '').trim();
+      // Dual-identity: accept reporter_user_id (UUID, for SDK 1.4.0+
+      // when it forwards userContext.userId) AND/OR reporter_email
+      // (text, for SDK 1.3.x which forwards email via
+      // metadata.reporter_email on submit). At least one must be
+      // present + must match either the bug's reporter_user_id column
+      // OR its metadata.reporter_email respectively.
+      const reporterUserIdRaw = (body.reporter_user_id ?? '').trim();
+      const reporterEmailRaw = (body.reporter_email ?? '').trim().toLowerCase();
 
       if (reason.length < MIN_REASON_LENGTH) {
         return createApiErrorResponse(
@@ -82,13 +84,14 @@ export const PATCH = withApiKeyAuth(
         );
       }
 
-      // UUID v4 sanity check — anything else can't possibly match a real
-      // auth.users id, so reject early with a clear error.
       const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!reporterUserId || !UUID_RE.test(reporterUserId)) {
+      const hasValidUserId = reporterUserIdRaw && UUID_RE.test(reporterUserIdRaw);
+      const hasValidEmail = reporterEmailRaw && reporterEmailRaw.includes('@');
+
+      if (!hasValidUserId && !hasValidEmail) {
         return createApiErrorResponse(
-          'MISSING_REPORTER_USER_ID',
-          'reporter_user_id is required and must be the UUID of the original reporter (from the consumer app\'s Supabase auth.users.id). Anonymous bugs cannot be reopened.',
+          'MISSING_REPORTER_IDENTITY',
+          'Either reporter_user_id (UUID of the consumer app\'s auth.users.id) or reporter_email (email of the original reporter) is required. Anonymous bugs cannot be reopened.',
           400
         );
       }
@@ -108,14 +111,12 @@ export const PATCH = withApiKeyAuth(
       );
 
       // Fetch the bug + verify cross-tenant safety in one query.
-      // NOTE on columns: bug_reports has `status` (text) + `resolved_at`
-      // (timestamptz) + `reporter_user_id` (uuid). It does NOT have
-      // `is_resolved` or `reporter_email` — referencing those was the
-      // PR #5 mistake. Status alone determines resolution state.
+      // Pulls metadata to access reporter_email (jsonb) for the
+      // SDK-1.3.x identity check fallback.
       const { data: bug, error: fetchError } = await supabase
         .from('bug_reports')
         .select(
-          'id, application_id, status, reporter_user_id, reopen_count, resolved_at'
+          'id, application_id, status, reporter_user_id, reopen_count, resolved_at, metadata'
         )
         .eq('id', id)
         .single();
@@ -155,18 +156,28 @@ export const PATCH = withApiKeyAuth(
         );
       }
 
-      // Identity gate: reporter_user_id must match
-      if (!bug.reporter_user_id) {
+      // Identity gate — dual-path. Either matches → authorized:
+      //   Path A (SDK 1.4.0+): bug.reporter_user_id matches body.reporter_user_id
+      //   Path B (SDK 1.3.x):  bug.metadata.reporter_email matches body.reporter_email
+      // Today most bugs are Path B because SDK 1.3.x forwards email only.
+      // When SDK forwards user.id too, bugs become identifiable by both.
+      const bugMetaEmail = ((bug.metadata as { reporter_email?: string } | null)?.reporter_email ?? '').trim().toLowerCase();
+
+      const matchByUserId = hasValidUserId && bug.reporter_user_id && bug.reporter_user_id === reporterUserIdRaw;
+      const matchByEmail = hasValidEmail && bugMetaEmail && bugMetaEmail === reporterEmailRaw;
+
+      if (!bug.reporter_user_id && !bugMetaEmail) {
         return createApiErrorResponse(
           'BUG_IS_ANONYMOUS',
-          'This bug was submitted anonymously and cannot be reopened. Submit a fresh bug report instead.',
+          'This bug was submitted with no recorded reporter identity and cannot be reopened. Submit a fresh bug report instead.',
           403
         );
       }
-      if (bug.reporter_user_id !== reporterUserId) {
+
+      if (!matchByUserId && !matchByEmail) {
         return createApiErrorResponse(
           'REPORTER_MISMATCH',
-          'Only the original reporter can reopen this bug.',
+          'Only the original reporter can reopen this bug. The reporter_user_id/reporter_email you provided does not match the bug\'s recorded reporter.',
           403
         );
       }

@@ -36,6 +36,25 @@ export const GET = withApiKeyAuth(async (request: NextRequest, context: ApiReque
     const search = searchParams.get('search');
     const sortBy = searchParams.get('sort_by') || 'created_at';
     const sortOrder = (searchParams.get('sort_order') || 'desc') as 'asc' | 'desc';
+    // User-scoping filters. Both optional + additive (AND). Consumers
+    // pass these to restrict the list to bugs filed by THIS user, not
+    // every bug in the app. Without these, returns all app bugs (current
+    // app-wide behavior preserved for backwards compat).
+    //
+    // - reporter_user_id: matches bug_reports.reporter_user_id (UUID,
+    //   set when the SDK eventually forwards userContext.userId; today
+    //   most existing bugs have this NULL because the SDK 1.3.2 doesn't
+    //   forward it)
+    // - reporter_email: matches bug_reports.metadata->>'reporter_email'
+    //   (the SDK 1.3.2 forwards userContext.email here — works today
+    //   without an SDK update)
+    //
+    // When only one is provided, scope by that one. When both are
+    // provided, OR them together (matches bugs where EITHER identifier
+    // points to this user — useful during migration period when some
+    // bugs have reporter_user_id and others only have metadata email).
+    const filterReporterUserId = searchParams.get('reporter_user_id');
+    const filterReporterEmail = searchParams.get('reporter_email');
 
     // Validate sort_by
     const allowedSortFields = ['created_at', 'updated_at', 'priority'];
@@ -75,6 +94,25 @@ export const GET = withApiKeyAuth(async (request: NextRequest, context: ApiReque
     if (search) {
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
     }
+
+    // User-scoping. Both filters are additive (OR'd) — see comment above.
+    // Postgres metadata->>'reporter_email' syntax in PostgREST: use the
+    // `metadata->>reporter_email` JSONB arrow operator via the eq() method.
+    if (filterReporterUserId && filterReporterEmail) {
+      // Match either identifier (during SDK-userId rollout, some bugs
+      // have only metadata.reporter_email; new bugs may have both).
+      // PostgREST .or() with json operator quoting:
+      query = query.or(
+        `reporter_user_id.eq.${filterReporterUserId},metadata->>reporter_email.eq.${filterReporterEmail}`
+      );
+    } else if (filterReporterUserId) {
+      query = query.eq('reporter_user_id', filterReporterUserId);
+    } else if (filterReporterEmail) {
+      // .eq on a JSON-arrow path. PostgREST accepts this syntax.
+      query = query.eq('metadata->>reporter_email', filterReporterEmail);
+    }
+    // If neither filter is provided → returns all app bugs (backwards
+    // compat with existing MyBugsPanel calls).
 
     // Apply sorting
     query = query.order(sortBy, { ascending: sortOrder === 'asc' });

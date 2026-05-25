@@ -213,15 +213,17 @@ export interface UpdateBugReportStatusResponse {
 // Lets the original reporter dispute a Resolved/Closed status. Server
 // flips status back to 'open', records reopened_at + reason, increments
 // reopen_count. Auth: standard SDK X-API-Key header. Reporter identity
-// verified via reporter_user_id (UUID) matching bug.reporter_user_id
-// (anonymous bugs cannot be reopened — they have no reporter to verify
-// against). Was reporter_email in PR #5; switched to reporter_user_id
-// on 2026-05-25 because bug_reports.reporter_email column does not
-// exist — the table stores reporter_user_id (FK to auth.users).
+// verified via either reporter_user_id (UUID, when SDK 1.4.0+ forwards
+// userContext.userId) OR reporter_email (when SDK 1.3.x stores email
+// in metadata.reporter_email). At least ONE must be provided + match
+// the bug's recorded identity. Anonymous bugs (no recorded identity)
+// cannot be reopened.
 
 export interface ReopenBugReportRequest {
-  reason: string;              // Required, min 10 chars
-  reporter_user_id: string;    // Required UUID — original reporter's auth.users.id
+  reason: string;                  // Required, min 10 chars
+  reporter_user_id?: string;       // UUID — preferred when available
+  reporter_email?: string;         // Fallback for SDK 1.3.x bugs
+  // At least one of reporter_user_id / reporter_email is required.
 }
 
 export interface ReopenBugReportResponse {
