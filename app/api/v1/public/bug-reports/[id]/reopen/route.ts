@@ -13,7 +13,17 @@ import type {
 } from '@boobalan_jkkn/shared';
 
 const MIN_REASON_LENGTH = 10;
-const REOPENABLE_STATUSES = new Set(['resolved', 'closed']);
+// 2026-05-25: PR #5 used 'resolved' + 'closed', but bug_reports_status_check
+// only allows ['new', 'seen', 'in_progress', 'resolved', 'wont_fix'].
+// 'closed' was a typo / wrong enum value. Reopening a 'wont_fix' bug
+// is semantically valid (reporter disagrees with the dismissal) so it
+// is included here; 'new'/'seen'/'in_progress' are not reopenable
+// because they're already in the active queue.
+const REOPENABLE_STATUSES = new Set(['resolved', 'wont_fix']);
+// What status to transition TO on reopen. PR #5 used 'open' which
+// also fails the CHECK constraint. The platform's initial-state status
+// is 'new', so reopen takes the bug back to that.
+const REOPEN_TARGET_STATUS = 'new';
 
 /**
  * PATCH /api/v1/public/bug-reports/:id/reopen
@@ -192,13 +202,15 @@ export const PATCH = withApiKeyAuth(
       }
 
       // Apply the reopen. `is_resolved` dropped from the update body
-      // (column does not exist; status='open' + resolved_at=null is the
-      // canonical signal of un-resolution).
+      // (column does not exist; status + resolved_at=null is the
+      // canonical signal of un-resolution). status transitions to
+      // REOPEN_TARGET_STATUS ('new') — the platform's initial-state
+      // value per the bug_reports_status_check CHECK constraint.
       const nowIso = new Date().toISOString();
       const { data: updated, error: updateError } = await supabase
         .from('bug_reports')
         .update({
-          status: 'open',
+          status: REOPEN_TARGET_STATUS,
           resolved_at: null,
           reopened_at: nowIso,
           reopen_reason: reason,
